@@ -57,6 +57,7 @@ export async function classifyIntent(
 - nutrition_log: User mentions eating food, drinking, meals (กิน, ทาน, อาหาร)
 - nutrition_summary: User wants nutrition/diet summary
 - status_check: User asks about relationship status or profile
+- reset_persona: User wants to reset, delete memory, or change character
 - roleplay: General conversation, emotional chat, flirting, casual talk
 
 Respond in JSON format: {"intent": "<intent_name>", "confidence": <0.0-1.0>}

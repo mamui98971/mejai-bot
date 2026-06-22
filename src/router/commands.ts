@@ -70,7 +70,7 @@ export const COMMAND_PATTERNS: CommandPattern[] = [
 
   // --- Reset Persona ---
   {
-    pattern: /^\/?(รีเซ็ตระบบ|ลบตัวละคร|เปลี่ยนตัวละคร|ล้างข้อมูล|reset)$/i,
+    pattern: /^\/?(รีเซ็?ตระบบ|รีเซ็?ต|ลบตัวละคร|เปลี่ยนตัวละคร|ล้างข้อมูล|reset)$/i,
     intent: Intent.RESET_PERSONA,
     description: 'Reset persona and affinity shortcut',
   },
