@@ -236,3 +236,26 @@ export async function updateAffinityScore(
   if (error || !updated) throw new Error(`Failed to update affinity: ${error?.message}`);
   return updated as UserRelationship;
 }
+
+/**
+ * Update the user's custom persona settings and mark them as onboarded.
+ */
+export async function updateUserPersona(
+  userId: string,
+  persona: { bot_name: string; bot_gender: string; bot_personality: string }
+): Promise<UserRelationship> {
+  const { data, error } = await supabase
+    .from('user_relationships')
+    .update({
+      bot_name: persona.bot_name,
+      bot_gender: persona.bot_gender,
+      bot_personality: persona.bot_personality,
+      is_onboarded: true,
+    })
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (error || !data) throw new Error(`Failed to update persona: ${error?.message}`);
+  return data as UserRelationship;
+}

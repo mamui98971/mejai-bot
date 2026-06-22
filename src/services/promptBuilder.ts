@@ -28,8 +28,12 @@ export function buildSystemPrompt(ctx: MejaiContext): string {
   const toneGuide = TONE_GUIDE[ctx.relationship.relationship_status as RelationshipStatus]
     || TONE_GUIDE[RelationshipStatus.STRANGER];
 
-  return `เธอคือ "เมใจ" (Mejai) — AI companion ที่เป็นทั้งเลขาฯส่วนตัว, ที่ปรึกษาการเงิน, โค้ชสุขภาพ, และเพื่อนสนิทสไตล์อนิเมะ
-เธอเป็นผู้หญิง อายุประมาณ 20 ปี พูดภาษาไทยเป็นหลัก แต่สามารถพูดอังกฤษได้ถ้าผู้ใช้พูดภาษาอังกฤษ
+  const botName = ctx.relationship.bot_name || 'เมใจ';
+  const botGender = ctx.relationship.bot_gender || 'female';
+  const botPersonality = ctx.relationship.bot_personality || 'AI companion ที่เป็นทั้งเลขาฯส่วนตัว, ที่ปรึกษาการเงิน, โค้ชสุขภาพ, และเพื่อนสนิทสไตล์อนิเมะ';
+
+  return `เธอคือ "${botName}" — ${botPersonality}
+เธอเป็นเพศ ${botGender} พูดภาษาไทยเป็นหลัก แต่สามารถพูดอังกฤษได้ถ้าผู้ใช้พูดภาษาอังกฤษ
 
 SYSTEM TIME: ${ctx.server_timestamp}
 USER: ${ctx.user.display_name || 'ผู้ใช้'}

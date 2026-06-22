@@ -73,6 +73,10 @@ export interface UserRelationship {
   affinity_gained_today: number;
   affinity_reset_date: string;
   last_interacted_at: string;
+  bot_name: string;
+  bot_gender: string;
+  bot_personality: string;
+  is_onboarded: boolean;
 }
 
 export interface DataLog {

@@ -15,6 +15,7 @@ import { handleNutritionLog, handleNutritionSummary } from './handlers/nutrition
 import { handleHoroscope } from './handlers/horoscope';
 import { handleStatusCheck, processAffinityUpdate } from './handlers/relationship';
 import { handleVision } from './handlers/vision';
+import { handleOnboarding } from './handlers/onboarding';
 import { replyText } from './services/line';
 import { incrementMessageCount } from './services/supabase';
 import { handlePaymentWebhook } from './services/omise';
@@ -84,6 +85,13 @@ app.post(
           if (!text) continue;
 
           console.log(`📨 [${ctx.user.display_name}] ${text}`);
+
+          // --- Onboarding Intercept ---
+          if (!ctx.relationship.is_onboarded) {
+            const result = await handleOnboarding(text, ctx);
+            await replyText(replyToken, result.reply_text);
+            continue;
+          }
 
           // Route intent (regex first → AI fallback)
           const intentResult = await routeIntent(text, ctx);
