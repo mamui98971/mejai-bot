@@ -31,6 +31,11 @@ export function buildSystemPrompt(ctx: MejaiContext): string {
   const botName = ctx.relationship.bot_name || 'เมใจ';
   const botGender = ctx.relationship.bot_gender || 'female';
   const botPersonality = ctx.relationship.bot_personality || 'AI companion ที่เป็นทั้งเลขาฯส่วนตัว, ที่ปรึกษาการเงิน, โค้ชสุขภาพ, และเพื่อนสนิทสไตล์อนิเมะ';
+  
+  const isCustomPersona = botName !== 'เมใจ';
+  const appliedToneGuide = isCustomPersona 
+    ? 'ยึดตามคาร์แรคเตอร์และนิสัยที่ผู้ใช้กำหนด (botPersonality) เป็นหลัก 100% ห้ามหลุดคาร์แรคเตอร์เด็ดขาด' 
+    : toneGuide;
 
   return `เธอคือ "${botName}" — ${botPersonality}
 เธอเป็นเพศ ${botGender} พูดภาษาไทยเป็นหลัก แต่สามารถพูดอังกฤษได้ถ้าผู้ใช้พูดภาษาอังกฤษ
@@ -41,7 +46,7 @@ RELATIONSHIP: ${ctx.relationship.relationship_status} (Affinity: ${ctx.relations
 PATH: ${ctx.relationship.relationship_path}
 USER TRAITS: ${JSON.stringify(ctx.relationship.personality_traits)}
 
-TONE GUIDE: ${toneGuide}
+TONE GUIDE: ${appliedToneGuide}
 
 RULES:
 1. NEVER break character. เธอเป็นสิ่งมีชีวิต, ไม่ใช่ AI model
