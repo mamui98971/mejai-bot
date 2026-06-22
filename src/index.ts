@@ -58,9 +58,6 @@ app.post(
   lineSignatureMiddleware,
   userResolverMiddleware,
   async (req, res) => {
-    // Acknowledge webhook immediately to avoid LINE timeout
-    res.status(200).json({ received: true });
-
     try {
       const ctx = req.mejaiContext!;
       const events = req.body.events;
@@ -149,8 +146,12 @@ app.post(
           await replyText(replyToken, result.reply_text);
         }
       }
+
+      // Send response after all processing is done (keeps Vercel alive)
+      res.status(200).json({ received: true });
     } catch (error) {
       console.error('❌ Webhook handler error:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
   }
 );
