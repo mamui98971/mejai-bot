@@ -259,3 +259,29 @@ export async function updateUserPersona(
   if (error || !data) throw new Error(`Failed to update persona: ${error?.message}`);
   return data as UserRelationship;
 }
+
+/**
+ * Reset the user's custom persona, relationship status, and clear conversation history.
+ */
+export async function resetUserPersona(userId: string): Promise<void> {
+  // Clear conversation history
+  await supabase
+    .from('conversation_history')
+    .delete()
+    .eq('user_id', userId);
+
+  // Reset relationship to stranger and clear custom persona
+  await supabase
+    .from('user_relationships')
+    .update({
+      affinity_score: 0,
+      relationship_status: RelationshipStatus.STRANGER,
+      relationship_path: RelationshipPath.NEUTRAL,
+      affinity_gained_today: 0,
+      bot_name: 'เมใจ',
+      bot_gender: 'female',
+      bot_personality: 'ผู้ช่วยส่วนตัวและเพื่อนสนิทที่คอยดูแลสุขภาพ การเงิน และตารางงานให้ผู้ใช้ นิสัยน่ารัก ขี้อ้อน และเอาใจใส่',
+      is_onboarded: false,
+    })
+    .eq('user_id', userId);
+}

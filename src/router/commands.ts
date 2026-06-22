@@ -67,6 +67,13 @@ export const COMMAND_PATTERNS: CommandPattern[] = [
     intent: Intent.NUTRITION_SUMMARY,
     description: 'Calorie summary shortcut',
   },
+
+  // --- Reset Persona ---
+  {
+    pattern: /^\/?(รีเซ็ตระบบ|ลบตัวละคร|เปลี่ยนตัวละคร|ล้างข้อมูล|reset)$/i,
+    intent: Intent.RESET_PERSONA,
+    description: 'Reset persona and affinity shortcut',
+  },
 ];
 
 /**

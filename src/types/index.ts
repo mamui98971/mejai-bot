@@ -42,6 +42,7 @@ export enum Intent {
   STATUS_CHECK = 'status_check',
   VISION_RECEIPT = 'vision_receipt',
   VISION_FOOD = 'vision_food',
+  RESET_PERSONA = 'reset_persona',
   UNKNOWN = 'unknown',
 }
 

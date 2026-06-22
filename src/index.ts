@@ -17,7 +17,7 @@ import { handleStatusCheck, processAffinityUpdate } from './handlers/relationshi
 import { handleVision } from './handlers/vision';
 import { handleOnboarding } from './handlers/onboarding';
 import { replyText } from './services/line';
-import { incrementMessageCount } from './services/supabase';
+import { incrementMessageCount, resetUserPersona } from './services/supabase';
 import { handlePaymentWebhook } from './services/omise';
 import { Intent } from './types';
 import { UPSELL_MESSAGES } from './config/constants';
@@ -126,6 +126,12 @@ app.post(
               break;
             case Intent.STATUS_CHECK:
               reply = (await handleStatusCheck(ctx)).reply_text;
+              break;
+
+            // Reset feature
+            case Intent.RESET_PERSONA:
+              await resetUserPersona(ctx.user.id);
+              reply = 'ลบข้อมูลตัวละครและความทรงจำเรียบร้อยแล้วค่ะ! พิมพ์ข้อความทักทายอีกครั้งเพื่อสร้างตัวละครใหม่ได้เลยนะคะ ✨';
               break;
 
             // Default: Roleplay (Mejai persona)
