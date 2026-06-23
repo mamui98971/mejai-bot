@@ -9,3 +9,6 @@ recovery-codes*.txt
 .DS_Store
 liff/node_modules
 liff/dist
+
+.vercel
+.env*

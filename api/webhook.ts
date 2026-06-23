@@ -3,7 +3,7 @@
 // Re-exports Express app for Vercel's serverless runtime.
 // ============================================================
 
-import app from '../src/index';
+import app from '../server/index';
 
 // Disable Vercel's default body parser to allow Express 
 // to capture the raw body for LINE signature verification.
