@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "framework": "vite",
   "crons": [
     {
       "path": "/api/cron/notify",
