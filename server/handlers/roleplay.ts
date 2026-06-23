@@ -32,7 +32,7 @@ export async function handleRoleplay(
   // Call DeepSeek for Mejai's response
   const response = await chat(messages, {
     temperature: 0.85,
-    max_tokens: 1024,
+    max_tokens: 2048,
   });
 
   // Save both turns to conversation history
