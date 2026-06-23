@@ -141,7 +141,10 @@ import { updateUserSettings } from '../services/supabase';
 liffRouter.put('/settings', async (req, res) => {
   try {
     const parsed = settingsSchema.safeParse(req.body);
-    if (!parsed.success) return res.status(400).json({ error: 'Invalid settings payload' });
+    if (!parsed.success) {
+      console.error('Settings validation failed:', parsed.error);
+      return res.status(400).json({ error: 'Invalid settings payload', details: parsed.error });
+    }
     const { userProfile, aiPersona } = parsed.data;
     const lineUserId = req.liffLineUserId!;
     
