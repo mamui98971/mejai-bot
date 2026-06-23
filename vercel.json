@@ -1,7 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd liff && npm install && npm run build",
-  "outputDirectory": "liff/dist",
+  "buildCommand": "cd liff && npm install && npm run build && cd .. && rm -rf public && mv liff/dist public",
   "rewrites": [
     {
       "source": "/api/(.*)",
