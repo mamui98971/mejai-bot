@@ -42,6 +42,7 @@ export interface UserProfileInput {
   weight?: number;
   height?: number;
   goal?: 'ผอม' | 'สมส่วน' | 'อ้วน';
+  monthly_budget?: number;
 }
 
 export interface AiPersonaInput {

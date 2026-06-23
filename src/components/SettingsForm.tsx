@@ -27,7 +27,7 @@ export function SettingsForm({ data, onBack }: SettingsFormProps) {
     weight: data?.user?.weight ? String(data.user.weight) : '',
     height: data?.user?.height ? String(data.user.height) : '',
     goal: data?.user?.goal || '',
-    monthly_budget: '',
+    monthly_budget: data?.user?.monthlyBudget ? String(data.user.monthlyBudget) : '',
   });
 
   const [aiPersona, setAiPersona] = useState({
@@ -90,6 +90,7 @@ export function SettingsForm({ data, onBack }: SettingsFormProps) {
           weight: userProfile.weight ? parseFloat(userProfile.weight) : undefined,
           height: userProfile.height ? parseFloat(userProfile.height) : undefined,
           goal: userProfile.goal === 'ผอม' || userProfile.goal === 'สมส่วน' || userProfile.goal === 'อ้วน' ? userProfile.goal : undefined,
+          monthly_budget: userProfile.monthly_budget ? parseInt(userProfile.monthly_budget) : undefined,
         },
         {
           bot_name: aiPersona.bot_name || undefined,
