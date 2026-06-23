@@ -68,6 +68,7 @@ export interface User {
   weight?: number;
   height?: number;
   goal?: 'ผอม' | 'สมส่วน' | 'อ้วน';
+  monthly_budget?: number;
   created_at: string;
   updated_at: string;
 }
