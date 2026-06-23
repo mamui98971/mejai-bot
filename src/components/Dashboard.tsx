@@ -6,8 +6,17 @@ interface DashboardProps {
   data: DashboardData;
 }
 
+const STATUS_MAP: Record<string, string> = {
+  stranger: 'คนแปลกหน้า',
+  acquaintance: 'คนรู้จัก',
+  friend: 'เพื่อน',
+  close_friend: 'เพื่อนสนิท',
+  soulmate: 'คนรู้ใจ',
+};
+
 export function Dashboard({ data }: DashboardProps) {
   const { relationship, stats } = data;
+  const displayStatus = STATUS_MAP[relationship.status?.toLowerCase()] || relationship.status;
 
   return (
     <div className="dashboard-view fadeIn">
@@ -16,7 +25,7 @@ export function Dashboard({ data }: DashboardProps) {
           <h2>ความสัมพันธ์ ({relationship.bot_name || 'เมใจ'})</h2>
         </div>
         <div className="stats-grid mb-24">
-          <div className="stat-box"><span className="stat-label">สถานะ</span><span className="stat-value primary">{relationship.status}</span></div>
+          <div className="stat-box"><span className="stat-label">สถานะ</span><span className="stat-value primary">{displayStatus}</span></div>
           <div className="stat-box"><span className="stat-label">ความสนิท</span><span className="stat-value">{relationship.affinityScore}/100</span></div>
         </div>
 
