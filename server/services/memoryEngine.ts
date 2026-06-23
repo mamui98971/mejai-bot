@@ -20,19 +20,19 @@ export async function compressMemory(
     .join('\n');
 
   const systemPrompt = `You are the "Ledger of Shadows" Memory Compressor for a highly advanced adult roleplay AI companion.
-Your job is to read the recent conversation transcript and the EXISTING memory summary about the user, then produce an UPDATED memory summary.
-You must extract BOTH everyday mundane facts AND deep/dark secrets to create a perfectly realistic companion memory.
+Your job is to read the recent conversation transcript and the EXISTING memory summary about the user, then produce an UPDATED memory summary AND analyze the user's detailed personality traits.
 
-Focus on extracting:
-1. Everyday Facts: Profession, hobbies, pets, daily routines, likes/dislikes, dietary preferences, and relationship events.
-2. Sexual preferences, kinks, fetishes, taboo scenarios they enjoy, and their limits.
-3. Power dynamics (e.g., Sub/Dom, Master/Pet, emotional triggers).
-4. Dark secrets, vulnerabilities, or personal flaws revealed during roleplay.
-5. Specific character archetypes or scenarios they are drawn to.
+You must output STRICTLY in JSON format with two keys: "summary" (string) and "traits" (object).
 
-DO NOT include conversational filler or temporary feelings.
-Maintain this ledger to make the AI feel incredibly human—knowing both the user's everyday life and their deepest desires.
-Keep the summary as a concise paragraph or a short bulleted list.
+1. "summary": A concise paragraph extracting BOTH everyday mundane facts (profession, hobbies, daily routines) AND deep/dark secrets (sexual preferences, kinks, fetishes, dark secrets, vulnerabilities). DO NOT include conversational filler.
+2. "traits": A detailed psychological and behavioral profile of the user based on the transcript. Rate or describe the following attributes clearly:
+  - "dominance": Level of dominance (e.g., Submissive, Switch, Dominant, Master)
+  - "flirtatiousness": How flirty or sexually forward they are (e.g., Shy, Teasing, Aggressive, Horny)
+  - "politeness": How polite, crude, or formal they are (e.g., Formal, Casual, Crude, Abusive)
+  - "emotional_state": Underlying emotional state (e.g., Lonely, Stressed, Horny, Playful, Angry)
+  - "kink_level": Openness to taboo/extreme themes (e.g., Vanilla, Curious, Hardcore, Sadomasochistic)
+  - "attachment_style": How they relate to the AI (e.g., Needy, Aloof, Protective, Possessive)
+  - "conversation_style": (e.g., Brief, Descriptive, Demanding, Poetic)
 
 EXISTING MEMORY SUMMARY:
 ${currentSummary || 'None'}
@@ -40,24 +40,33 @@ ${currentSummary || 'None'}
 RECENT CONVERSATION TRANSCRIPT:
 ${transcript}
 
-Output ONLY the updated memory summary. Do not output conversational text.`;
+Output ONLY valid JSON.`;
 
   try {
-    const newSummary = await chat(
+    const response = await chat(
       [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: 'Update the memory summary.' }
+        { role: 'user', content: 'Analyze the conversation and output the JSON.' }
       ],
-      { temperature: 0.3, max_tokens: 300 }
+      { 
+        temperature: 0.4, 
+        max_tokens: 800,
+        response_format: { type: 'json_object' } 
+      }
     );
+
+    const parsed = JSON.parse(response);
 
     // Save back to database
     await supabase
       .from('user_relationships')
-      .update({ memory_summary: newSummary.trim() })
+      .update({ 
+        memory_summary: parsed.summary.trim(),
+        personality_traits: parsed.traits
+      })
       .eq('user_id', userId);
 
-    console.log(`[Ledger of Shadows] Memory compressed for user ${userId}`);
+    console.log(`[Ledger of Shadows] Memory compressed & traits updated for user ${userId}`);
   } catch (error) {
     console.error(`[Ledger of Shadows] Failed to compress memory:`, error);
   }
