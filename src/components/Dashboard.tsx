@@ -17,6 +17,7 @@ const STATUS_MAP: Record<string, string> = {
 export function Dashboard({ data }: DashboardProps) {
   const { relationship, stats } = data;
   const displayStatus = STATUS_MAP[relationship.status?.toLowerCase()] || relationship.status;
+  const remainingBudget = (data.user.monthlyBudget || 0) - (stats.monthlyExpense || 0);
 
   return (
     <div className="dashboard-view fadeIn">
@@ -36,8 +37,8 @@ export function Dashboard({ data }: DashboardProps) {
             <span className="stat-value cyan">฿{stats.dailyExpense.toLocaleString()}</span>
           </div>
           <div className="stat-box">
-            <div className="stat-label-row"><span className="stat-label">ข้อความวันนี้</span></div>
-            <span className="stat-value purple">{data.user.messageCount} <span style={{fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)'}}>ข้อความ</span></span>
+            <div className="stat-label-row"><span className="stat-label">งบประมาณคงเหลือ</span></div>
+            <span className={`stat-value ${remainingBudget < 0 ? 'red' : 'purple'}`}>฿{remainingBudget.toLocaleString()}</span>
           </div>
         </div>
 

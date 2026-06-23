@@ -56,6 +56,7 @@ export interface DashboardData {
     displayName: string | null;
     tier: 'free' | 'standard' | 'premium';
     messageCount: number;
+    monthlyBudget: number;
     birthdate?: string | null;
     age?: number | null;
     gender?: string | null;
@@ -72,6 +73,7 @@ export interface DashboardData {
   };
   stats: {
     dailyExpense: number;
+    monthlyExpense: number;
     dailyCalories: number;
     dailyProtein: number;
     dailySodium: number;

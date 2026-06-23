@@ -299,6 +299,7 @@ export async function updateUserSettings(
       weight: userProfile.weight,
       height: userProfile.height,
       goal: userProfile.goal,
+      monthly_budget: userProfile.monthly_budget,
     })
     .eq('id', userId)
     .select()

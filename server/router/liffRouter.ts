@@ -22,6 +22,7 @@ const settingsSchema = z.object({
     weight: z.number().positive().max(1000).optional(),
     height: z.number().positive().max(300).optional(),
     goal: z.enum(['ผอม', 'สมส่วน', 'อ้วน']).optional(),
+    monthly_budget: z.number().nonnegative().optional(),
   }).strict(),
   aiPersona: z.object({
     bot_name: z.string().trim().min(1).max(100).optional(),
@@ -65,26 +66,33 @@ liffRouter.get('/me', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // 2. Fetch today's stats (Expenses & Nutrition)
+    // 2. Fetch this month's stats (Expenses & Nutrition)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     const { data: logs } = await supabase
       .from('user_data_logs')
       .select('*')
       .eq('user_id', user.id)
-      .gte('logged_at', today.toISOString());
+      .gte('logged_at', startOfMonth.toISOString());
 
     let dailyExpense = 0;
+    let monthlyExpense = 0;
     let dailyCalories = 0;
     let dailyProtein = 0;
     let dailySodium = 0;
 
     if (logs) {
       logs.forEach(log => {
+        const logDate = new Date(log.logged_at);
+        const isToday = logDate >= today;
+
         if (log.log_type === 'expense') {
-          dailyExpense += log.payload.amount || 0;
-        } else if (log.log_type === 'diet') {
+          monthlyExpense += log.payload.amount || 0;
+          if (isToday) dailyExpense += log.payload.amount || 0;
+        } else if (log.log_type === 'diet' && isToday) {
           dailyCalories += log.payload.calories || 0;
           dailyProtein += log.payload.protein || 0;
           dailySodium += log.payload.sodium || 0;
@@ -104,6 +112,7 @@ liffRouter.get('/me', async (req, res) => {
         weight: user.weight,
         height: user.height,
         goal: user.goal,
+        monthlyBudget: user.monthly_budget || 0,
       },
       relationship: {
         status: user.user_relationships?.relationship_status || 'Stranger',
@@ -114,6 +123,7 @@ liffRouter.get('/me', async (req, res) => {
       },
       stats: {
         dailyExpense,
+        monthlyExpense,
         dailyCalories,
         dailyProtein,
         dailySodium
