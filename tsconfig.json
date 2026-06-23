@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "lib": [
-      "ES2022"
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
     ],
+    "jsx": "react-jsx",
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
@@ -15,29 +19,27 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "paths": {
       "@config/*": [
-        "server/config/*"
+        "./server/config/*"
       ],
       "@services/*": [
-        "server/services/*"
+        "./server/services/*"
       ],
       "@handlers/*": [
-        "server/handlers/*"
+        "./server/handlers/*"
       ],
       "@middleware/*": [
-        "server/middleware/*"
+        "./server/middleware/*"
       ],
       "@router/*": [
-        "server/router/*"
+        "./server/router/*"
       ],
       "@types/*": [
-        "server/types/*"
+        "./server/types/*"
       ],
       "@utils/*": [
-        "server/utils/*"
+        "./server/utils/*"
       ]
     }
   },
