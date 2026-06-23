@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd liff && npm install && npm run build && cd .. && rm -rf public && mv liff/dist public",
+  "buildCommand": "cd liff && npm install && npm run build",
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -12,7 +12,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/$1"
+      "destination": "/index.html"
     }
   ],
   "crons": [
