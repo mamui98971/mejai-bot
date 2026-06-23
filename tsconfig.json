@@ -6,7 +6,7 @@
       "ES2022"
     ],
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -15,28 +15,29 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@config/*": [
-        "src/config/*"
+        "server/config/*"
       ],
       "@services/*": [
-        "src/services/*"
+        "server/services/*"
       ],
       "@handlers/*": [
-        "src/handlers/*"
+        "server/handlers/*"
       ],
       "@middleware/*": [
-        "src/middleware/*"
+        "server/middleware/*"
       ],
       "@router/*": [
-        "src/router/*"
+        "server/router/*"
       ],
       "@types/*": [
-        "src/types/*"
+        "server/types/*"
       ],
       "@utils/*": [
-        "src/utils/*"
+        "server/utils/*"
       ]
     }
   },
