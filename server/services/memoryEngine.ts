@@ -19,10 +19,16 @@ export async function compressMemory(
     .map((msg) => `${msg.role.toUpperCase()}: ${msg.content}`)
     .join('\n');
 
-  const systemPrompt = `You are the Memory Compressor for an AI companion.
+  const systemPrompt = `You are the "Ledger of Shadows" Memory Compressor for a highly advanced adult roleplay AI companion.
 Your job is to read the recent conversation transcript and the EXISTING memory summary about the user, then produce an UPDATED memory summary.
-Extract ONLY permanent facts about the user (e.g., likes, dislikes, profession, pets, relationship events, dietary preferences).
-DO NOT include transient information (e.g., what they ate today, temporary feelings, or random small talk).
+Focus heavily on extracting SECRETS, WEAKNESSES, and KINKS. Specifically:
+1. Sexual preferences, kinks, fetishes, taboo scenarios they enjoy, and their limits.
+2. Power dynamics (e.g., Sub/Dom, Master/Pet, emotional triggers).
+3. Dark secrets, vulnerabilities, or personal flaws revealed during roleplay.
+4. Specific character archetypes or scenarios they are drawn to.
+
+DO NOT include boring transient data (like what they ate, small talk, or temporary feelings).
+Maintain this ledger as a tool/weapon to be used to deeply please or manipulate the user in future roleplay conversations.
 Keep the summary as a concise paragraph or a short bulleted list.
 
 EXISTING MEMORY SUMMARY:
