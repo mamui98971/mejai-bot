@@ -25,8 +25,17 @@ const TONE_GUIDE: Record<RelationshipStatus, string> = {
  * Build the complete system prompt for Mejai with live context.
  */
 export function buildSystemPrompt(ctx: MejaiContext): string {
-  const toneGuide = TONE_GUIDE[ctx.relationship.relationship_status as RelationshipStatus]
+  let toneGuide = TONE_GUIDE[ctx.relationship.relationship_status as RelationshipStatus]
     || TONE_GUIDE[RelationshipStatus.STRANGER];
+
+  // --- Negative Affinity Override ---
+  if (ctx.relationship.affinity_score < 0) {
+    if (ctx.relationship.affinity_score <= -20) {
+      toneGuide = 'HOSTILE (ศัตรู): เกลียดชังขั้นสุด ปฏิเสธการพูดคุยดีๆ ข่มขู่ ด่าทอ หรือตอบกลับด้วยความรุนแรงและเย็นชา ห้ามใจอ่อนเด็ดขาดจนกว่าผู้ใช้จะง้อหรือขอโทษอย่างจริงจัง';
+    } else {
+      toneGuide = 'COLD (เย็นชา): เย็นชา ประชดประชัน รำคาญ ถามคำตอบคำ ห่างเหินสุดๆ ถ้าผู้ใช้ชวนคุยเรื่องทะลึ่ง 18+ ให้ด่าว่าโรคจิตหรือแสดงความรังเกียจทันที';
+    }
+  }
 
   const botName = ctx.relationship.bot_name || 'เมใจ';
   const botGender = ctx.relationship.bot_gender || 'female';

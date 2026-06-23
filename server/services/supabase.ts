@@ -237,7 +237,7 @@ export async function updateAffinityScore(
     gainedToday += effectiveDelta;
   }
 
-  const newScore = Math.max(0, Math.min(100, current.affinity_score + effectiveDelta));
+  const newScore = Math.max(-100, Math.min(100, current.affinity_score + effectiveDelta));
 
   const { data: updated, error } = await supabase
     .from('user_relationships')
