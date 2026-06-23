@@ -131,6 +131,21 @@ app.post(
 
           console.log(`📨 [${ctx.user.display_name}] ${text}`);
 
+          // --- Admin Secret Commands ---
+          if (text === '/version') {
+            if (env.ADMIN_UID && ctx.user.id === env.ADMIN_UID) {
+              const versionInfo = `[SYSTEM] Mejai Engine v2.1
+[MODULE] Ledger of Shadows: ACTIVE
+[MODULE] Natural Conversationalist: ACTIVE
+[MODULE] Dynamic Profiling: ACTIVE
+[STATUS] All systems nominal.`;
+              await replyText(replyToken, versionInfo);
+            } else {
+              await replyText(replyToken, '[SYSTEM: ERROR] Unauthorized access. Incident logged.');
+            }
+            continue; // Stop processing further
+          }
+
           // --- Onboarding Intercept ---
           if (!ctx.relationship.is_onboarded) {
             const result = await handleOnboarding(text, ctx);

@@ -36,6 +36,7 @@ const envSchema = z.object({
   // Server
   PORT: z.string().default('3000').transform(Number),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  ADMIN_UID: z.string().optional().default(''),
 });
 
 export type Env = z.infer<typeof envSchema>;
