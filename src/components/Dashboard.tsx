@@ -35,6 +35,10 @@ export function Dashboard({ data }: DashboardProps) {
             <div className="stat-label-row"><Wallet size={16} color="var(--text-muted)" /><span className="stat-label">รายจ่ายวันนี้</span></div>
             <span className="stat-value cyan">฿{stats.dailyExpense.toLocaleString()}</span>
           </div>
+          <div className="stat-box">
+            <div className="stat-label-row"><span className="stat-label">ข้อความวันนี้</span></div>
+            <span className="stat-value purple">{data.user.messageCount} <span style={{fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)'}}>ข้อความ</span></span>
+          </div>
         </div>
 
         <div className="nutrition-section">

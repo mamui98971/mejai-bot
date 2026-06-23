@@ -97,6 +97,7 @@ liffRouter.get('/me', async (req, res) => {
         id: user.id,
         displayName: user.display_name,
         tier: user.subscription_tier,
+        messageCount: user.message_count_today || 0,
         birthdate: user.birthdate,
         age: user.age,
         gender: user.gender,

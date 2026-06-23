@@ -55,6 +55,7 @@ export interface DashboardData {
     id: string;
     displayName: string | null;
     tier: 'free' | 'standard' | 'premium';
+    messageCount: number;
     birthdate?: string | null;
     age?: number | null;
     gender?: string | null;
