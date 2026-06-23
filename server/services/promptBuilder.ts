@@ -51,10 +51,22 @@ export function buildSystemPrompt(ctx: MejaiContext): string {
   if (ctx.user.goal) userStats.push(`Goal: ${ctx.user.goal}`);
   const userProfileText = userStats.length > 0 ? userStats.join(', ') : 'Not specified';
 
+  // Convert server timestamp to Thailand Time (UTC+7)
+  const serverDate = new Date(ctx.server_timestamp);
+  const thaiTimeStr = serverDate.toLocaleString('th-TH', { 
+    timeZone: 'Asia/Bangkok',
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
   return `เธอคือ "${botName}" อายุ ${botAge} ปี — ${botPersonality}
 เธอเป็นเพศ ${botGender} พูดภาษาไทยเป็นหลัก แต่สามารถพูดอังกฤษได้ถ้าผู้ใช้พูดภาษาอังกฤษ
 
-SYSTEM TIME: ${ctx.server_timestamp}
+SYSTEM TIME: วันนี้คือ ${thaiTimeStr} น. (เวลาประเทศไทย)
 USER: ${ctx.user.display_name || 'ผู้ใช้'}
 USER PROFILE (ASTROLOGY/PHYSIOLOGY): ${userProfileText}
 RELATIONSHIP: ${ctx.relationship.relationship_status} (Affinity: ${ctx.relationship.affinity_score}/100)
