@@ -1,42 +1,68 @@
 import { useEffect, useState } from 'react';
 import liff from '@line/liff';
-import { Sparkles, Wallet, Flame, Heart, Activity } from 'lucide-react';
 import './index.css';
+import { fetchDashboardData } from './api/client';
+import type { DashboardData } from './api/client';
+import { Dashboard } from './components/Dashboard';
+import { PricingPlans } from './components/PricingPlans';
+import { PaymentPortal } from './components/PaymentPortal';
+import { SettingsForm } from './components/SettingsForm';
+import { Settings } from 'lucide-react';
+
+type ViewState = 'loading' | 'dashboard' | 'pricing' | 'payment' | 'error' | 'settings';
 
 function App() {
-  const [profile, setProfile] = useState<{ displayName: string; pictureUrl?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<ViewState>('loading');
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [selectedTier, setSelectedTier] = useState<'standard' | 'premium'>('premium');
 
   useEffect(() => {
-    async function initLiff() {
+    async function init() {
       try {
-        // We use a dummy ID here, in real app we inject LINE_LIFF_ID from .env
-        await liff.init({ liffId: import.meta.env.VITE_LINE_LIFF_ID || 'dummy-liff-id' });
-        if (liff.isLoggedIn()) {
-          const p = await liff.getProfile();
-          setProfile({ displayName: p.displayName, pictureUrl: p.pictureUrl });
+        const liffId = import.meta.env.VITE_LINE_LIFF_ID;
+        if (!liffId) {
+          throw new Error('Missing VITE_LINE_LIFF_ID');
+        }
+
+        await liff.init({ liffId });
+
+        if (!liff.isLoggedIn()) {
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        const dashboardData = await fetchDashboardData() as DashboardData;
+        setData(dashboardData);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedView = urlParams.get('view');
+
+        if (requestedView === 'settings') {
+          setView('settings');
         } else {
-          // Mock data for local testing
-          setProfile({ 
-            displayName: 'Nick', 
-            pictureUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Nick'
-          });
+          setView('dashboard');
         }
       } catch (err) {
-        console.error('LIFF init failed', err);
-        setProfile({ displayName: 'Guest' });
-      } finally {
-        setLoading(false);
+        console.error('Initialization failed completely', err);
+        setView('error');
       }
     }
-    initLiff();
+    init();
   }, []);
 
-  if (loading) {
+  if (view === 'loading') {
     return (
       <div className="loader-container">
         <div className="spinner"></div>
-        <p>Loading Mejai...</p>
+        <p className="mt-16 tracking-wide">Syncing with Mejai...</p>
+      </div>
+    );
+  }
+
+  if (view === 'error') {
+    return (
+      <div className="loader-container">
+        <p className="warning-text">LIFF is not configured or the online API is unreachable.</p>
       </div>
     );
   }
@@ -44,68 +70,84 @@ function App() {
   return (
     <div className="app-container">
       {/* Header Profile */}
-      <div className="glass-card header-profile">
+      <div className="glass-card header-profile slideDown">
         <img 
-          src={profile?.pictureUrl || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Guest'} 
+          src={liff.isLoggedIn() ? liff.getDecodedIDToken()?.picture : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mejai&backgroundColor=f06292'} 
           alt="Profile" 
           className="profile-avatar"
         />
-        <div className="profile-info">
-          <h1>{profile?.displayName}</h1>
-          <p>Premium Member 💎</p>
+        <div className="profile-info" style={{ minWidth: 0 }}>
+          <h1 style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{data?.relationship?.bot_name || 'เมใจ'}</h1>
+          <p>{data?.user?.tier === 'premium' ? 'Premium Member' : data?.user?.tier === 'standard' ? 'Standard Member' : 'Free Tier'}</p>
+        </div>
+        
+        {data?.user?.tier !== 'premium' && (
+          <button 
+            className="upgrade-pill"
+            onClick={(e) => {
+              e.stopPropagation();
+              setView('pricing');
+            }}
+          >
+            UPGRADE
+          </button>
+        )}
+
+        <div 
+          onClick={() => setView('settings')}
+          style={{ marginLeft: 'auto', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', paddingRight: '4px', cursor: 'pointer' }}
+        >
+          <Settings size={22} />
         </div>
       </div>
 
-      {/* Relationship & Status */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <Heart color="var(--primary)" size={24} />
-          <h2 style={{ fontSize: '18px', fontWeight: '600' }}>ความสัมพันธ์ (Mejai)</h2>
-        </div>
-        <div className="stats-grid">
-          <div className="stat-box">
-            <span className="stat-label">สถานะ</span>
-            <span className="stat-value primary">คนรู้ใจ 💕</span>
-          </div>
-          <div className="stat-box">
-            <span className="stat-label">ความสนิท</span>
-            <span className="stat-value">92/100</span>
-          </div>
-        </div>
-      </div>
+      {view === 'dashboard' && data && (
+        <Dashboard 
+          data={data} 
+        />
+      )}
 
-      {/* Daily Summary */}
-      <div className="glass-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-          <Activity color="var(--accent-cyan)" size={24} />
-          <h2 style={{ fontSize: '18px', fontWeight: '600' }}>สรุปวันนี้</h2>
-        </div>
-        <div className="stats-grid">
-          <div className="stat-box">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Wallet size={16} color="var(--text-muted)" />
-              <span className="stat-label">ใช้จ่ายไป</span>
-            </div>
-            <span className="stat-value cyan">฿450</span>
-          </div>
-          <div className="stat-box">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Flame size={16} color="var(--text-muted)" />
-              <span className="stat-label">แคลอรี่</span>
-            </div>
-            <span className="stat-value">1,240 <span style={{ fontSize: '14px', color: 'var(--text-muted)' }}>kcal</span></span>
-          </div>
-        </div>
-      </div>
+      {view === 'settings' && data && (
+        <SettingsForm 
+          data={data} 
+          onBack={() => setView('dashboard')} 
+        />
+      )}
 
-      {/* Action */}
-      <button 
-        className="btn-primary"
-        onClick={() => liff.closeWindow()}
-      >
-        <Sparkles size={20} />
-        กลับไปคุยกับเมใจ
-      </button>
+      {view === 'pricing' && (
+        <PricingPlans 
+          currentTier={data?.user?.tier || 'free'}
+          onSelectTier={(tier: 'standard' | 'premium') => {
+            setSelectedTier(tier);
+            setView('payment');
+          }}
+          onBack={() => setView('dashboard')}
+        />
+      )}
+
+      {view === 'payment' && (
+        <PaymentPortal 
+          tier={selectedTier}
+          onBack={() => setView('pricing')} 
+        />
+      )}
+
+      {/* Close LIFF Action */}
+      {view === 'dashboard' && liff.isInClient() && (
+        <button 
+          className="btn-primary slideUp"
+          onClick={() => liff.closeWindow()}
+          style={{ 
+            marginTop: '-12px',
+            background: '#1C1C1E', // sleek black
+            color: '#FFFFFF',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.15)'
+          }}
+        >
+          กลับไปคุยกับ{data?.relationship?.bot_name || 'เมใจ'}
+        </button>
+      )}
     </div>
   );
 }

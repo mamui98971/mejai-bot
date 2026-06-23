@@ -4,9 +4,10 @@
 // ============================================================
 
 import express from 'express';
+import cors from 'cors';
 import { env } from './config/env';
 import { lineSignatureMiddleware } from './middleware/lineSignature';
-import { userResolverMiddleware } from './middleware/userResolver';
+import { resolveEventContext } from './middleware/userResolver';
 import { routeIntent, isTextEvent, getEventText } from './router/intentRouter';
 import { handleRoleplay } from './handlers/roleplay';
 import { handleExpenseLog, handleExpenseSummary } from './handlers/expense';
@@ -16,13 +17,20 @@ import { handleHoroscope } from './handlers/horoscope';
 import { handleStatusCheck, processAffinityUpdate } from './handlers/relationship';
 import { handleVision } from './handlers/vision';
 import { handleOnboarding } from './handlers/onboarding';
-import { replyText } from './services/line';
+import { handleProfileUpdate } from './handlers/profile';
+import { liffRouter } from './router/liffRouter';
+import { replyText, replyWithQuickReplies } from './services/line';
 import { incrementMessageCount, resetUserPersona } from './services/supabase';
 import { handlePaymentWebhook } from './services/omise';
 import { Intent } from './types';
 import { UPSELL_MESSAGES } from './config/constants';
+import { startScheduleNotifier } from './cron/scheduleNotifier';
+import { resetDailyLimits } from './cron/resetDailyLimits';
 
 const app = express();
+
+// ---- CORS ----
+app.use(cors());
 
 // ---- Raw body capture (needed for LINE signature verification) ----
 app.use(
@@ -53,14 +61,48 @@ app.post('/api/payment/webhook', async (req, res) => {
   }
 });
 
+// ---- LIFF Backend Endpoints ----
+app.use('/api/liff', liffRouter);
+
+// ---- Vercel Cron Job Endpoint ----
+app.get('/api/cron/notify', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${env.CRON_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  try {
+    // We import checkAndNotifySchedules dynamically to avoid running interval in serverless
+    const { checkAndNotifySchedules } = await import('./cron/scheduleNotifier');
+    await checkAndNotifySchedules();
+    res.status(200).json({ status: 'success', message: 'Cron job executed' });
+  } catch (error) {
+    console.error('❌ Vercel cron error:', error);
+    res.status(500).json({ error: 'Failed to execute cron' });
+  }
+});
+
+app.get('/api/cron/reset-daily-limits', async (req, res) => {
+  if (req.headers.authorization !== `Bearer ${env.CRON_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  try {
+    await resetDailyLimits();
+    res.status(200).json({ status: 'success' });
+  } catch (error) {
+    console.error('Daily-limit reset failed:', error);
+    res.status(500).json({ error: 'Failed to reset daily limits' });
+  }
+});
+
 // ---- LINE Webhook ----
 app.post(
   '/api/webhook',
   lineSignatureMiddleware,
-  userResolverMiddleware,
   async (req, res) => {
     try {
-      const ctx = req.mejaiContext!;
       const events = req.body.events;
 
       for (const event of events) {
@@ -69,6 +111,9 @@ app.post(
 
         const replyToken = event.replyToken;
         if (!replyToken) continue;
+
+        const ctx = await resolveEventContext(event);
+        if (!ctx) continue;
 
         // Check daily message limit
         if (ctx.user.message_count_today >= ctx.tier_config.messages_per_day) {
@@ -97,7 +142,7 @@ app.post(
           const intentResult = await routeIntent(text, ctx);
 
           // Dispatch to handler based on intent
-          let reply: string;
+          let reply: string | undefined = undefined;
 
           switch (intentResult.intent) {
             // Phase 3 handlers
@@ -127,9 +172,21 @@ app.post(
             case Intent.STATUS_CHECK:
               reply = (await handleStatusCheck(ctx)).reply_text;
               break;
+            case Intent.UPDATE_PROFILE:
+              reply = (await handleProfileUpdate(text, ctx)).reply_text;
+              break;
 
             // Reset feature
             case Intent.RESET_PERSONA:
+              await replyWithQuickReplies(
+                replyToken,
+                '⚠️ คุณแน่ใจหรือไม่ว่าต้องการลบตัวละครปัจจุบัน? หากยืนยัน ตัวละคร ความทรงจำ และคะแนนความสนิทจะหายไปตลอดกาลและต้องเริ่มสร้างใหม่ทั้งหมด',
+                ['ยืนยันการลบตัวละคร']
+              );
+              // We don't set reply string because we already replied with Quick Replies
+              break;
+
+            case Intent.RESET_PERSONA_CONFIRM:
               await resetUserPersona(ctx.user.id);
               reply = 'ลบข้อมูลตัวละครและความทรงจำเรียบร้อยแล้วค่ะ! พิมพ์ข้อความทักทายอีกครั้งเพื่อสร้างตัวละครใหม่ได้เลยนะคะ ✨';
               break;
@@ -143,7 +200,9 @@ app.post(
               break;
           }
 
-          await replyText(replyToken, reply);
+          if (reply) {
+            await replyText(replyToken, reply);
+          }
         }
 
         // --- Image Messages (Phase 5) ---
@@ -172,6 +231,9 @@ app.post(
 
 // ---- Start Server (local dev) ----
 if (env.NODE_ENV !== 'production') {
+  // Local cron fallback
+  startScheduleNotifier();
+  
   app.listen(env.PORT, () => {
     console.log(`\n🔮 Mejai is awakening on port ${env.PORT}...`);
     console.log(`   Health: http://localhost:${env.PORT}/health`);

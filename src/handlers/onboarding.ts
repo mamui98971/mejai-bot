@@ -22,6 +22,7 @@ Respond ONLY in JSON format:
   "extracted": {
     "bot_name": "string", // The actual character's name (e.g. "เซนคู")
     "bot_gender": "female" | "male" | "other",
+    "bot_age": number, // The character's age (e.g. 18). Guess if not provided.
     "bot_personality": "string" // VERY IMPORTANT: If the user names a famous character (e.g., from an anime or movie), write a highly detailed persona prompt describing their specific tone, catchphrases, attitude, and background. Do NOT just copy the user's message. E.g., if Senku, write "เป็นคนฉลาด มั่นใจในตัวเอง ชอบพูดคำว่า '10 พันล้านเปอร์เซ็นต์' มีความรู้เรื่องวิทยาศาสตร์ พูดจาห้าวๆ แบบผู้ชาย"
   },
   "reply_text": "string" // Reply fully IN CHARACTER of the new persona. If it's Senku, reply like Senku would. Do NOT reply like a generic polite assistant.
@@ -48,6 +49,7 @@ Current User Message: ${userMessage}
       const persona = {
         bot_name: parsed.extracted.bot_name || 'เมใจ',
         bot_gender: parsed.extracted.bot_gender || 'female',
+        bot_age: parsed.extracted.bot_age || 22,
         bot_personality: parsed.extracted.bot_personality || 'ผู้ช่วยส่วนตัวและเพื่อนสนิท',
       };
       await updateUserPersona(ctx.user.id, persona);

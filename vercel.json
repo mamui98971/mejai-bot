@@ -1,15 +1,29 @@
 {
   "version": 2,
-  "builds": [
+  "buildCommand": "cd liff && npm install && npm run build",
+  "outputDirectory": "liff/dist",
+  "rewrites": [
     {
-      "src": "api/webhook.ts",
-      "use": "@vercel/node"
+      "source": "/api/(.*)",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index.ts"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
     }
   ],
-  "routes": [
+  "crons": [
     {
-      "src": "/api/webhook",
-      "dest": "api/webhook.ts"
+      "path": "/api/cron/notify",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/reset-daily-limits",
+      "schedule": "0 17 * * *"
     }
   ]
 }

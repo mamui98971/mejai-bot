@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      LINE_CHANNEL_ID: test-channel
+      LINE_CHANNEL_SECRET: test-secret
+      LINE_CHANNEL_ACCESS_TOKEN: test-token
+      DEEPSEEK_API_KEY: test-key
+      DEEPSEEK_BASE_URL: https://api.deepseek.com
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_ANON_KEY: test-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: test-service-key
+      OMISE_PUBLIC_KEY: pkey_test_example
+      OMISE_SECRET_KEY: skey_test_example
+      CRON_SECRET: test-cron-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm ci --prefix liff
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build

@@ -38,11 +38,13 @@ export enum Intent {
   EXPENSE_SUMMARY = 'expense_summary',
   NUTRITION_LOG = 'nutrition_log',
   NUTRITION_SUMMARY = 'nutrition_summary',
+  UPDATE_PROFILE = 'update_profile',
   ROLEPLAY = 'roleplay',
   STATUS_CHECK = 'status_check',
   VISION_RECEIPT = 'vision_receipt',
   VISION_FOOD = 'vision_food',
   RESET_PERSONA = 'reset_persona',
+  RESET_PERSONA_CONFIRM = 'reset_persona_confirm',
   UNKNOWN = 'unknown',
 }
 
@@ -56,11 +58,16 @@ export enum ConversationRole {
 export interface User {
   id: string;
   line_user_id: string;
-  display_name: string | null;
+  display_name: string;
   subscription_tier: SubscriptionTier;
   message_count_today: number;
-  subscription_expiry: string | null;
-  birthdate: string | null;
+  subscription_expiry?: string;
+  birthdate?: string;
+  age?: number;
+  gender?: string;
+  weight?: number;
+  height?: number;
+  goal?: 'ผอม' | 'สมส่วน' | 'อ้วน';
   created_at: string;
   updated_at: string;
 }
@@ -76,8 +83,10 @@ export interface UserRelationship {
   last_interacted_at: string;
   bot_name: string;
   bot_gender: string;
+  bot_age: number;
   bot_personality: string;
   is_onboarded: boolean;
+  memory_summary: string;
 }
 
 export interface DataLog {

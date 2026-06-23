@@ -30,6 +30,9 @@ const envSchema = z.object({
   OMISE_PUBLIC_KEY: z.string().optional().default(''),
   OMISE_SECRET_KEY: z.string().optional().default(''),
 
+  // Vercel cron requests must present this secret in the Authorization header.
+  CRON_SECRET: z.string().optional().default(''),
+
   // Server
   PORT: z.string().default('3000').transform(Number),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
@@ -45,6 +48,11 @@ function validateEnv(): Env {
     for (const issue of result.error.issues) {
       console.error(`   → ${issue.path.join('.')}: ${issue.message}`);
     }
+    process.exit(1);
+  }
+
+  if (result.data.NODE_ENV === 'production' && !result.data.CRON_SECRET) {
+    console.error('❌ Environment validation failed: CRON_SECRET is required in production');
     process.exit(1);
   }
 

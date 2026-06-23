@@ -39,6 +39,17 @@ export async function handleRoleplay(
   await saveConversationTurn(ctx.user.id, ConversationRole.USER, message);
   await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, response);
 
+  // --- LEDGER OF SHADOWS (Memory Compression) ---
+  // Every 10 messages, trigger background memory compression
+  if (ctx.user.message_count_today > 0 && ctx.user.message_count_today % 10 === 0) {
+    const { getRecentConversationForMemory } = await import('../services/supabase');
+    const { compressMemory } = await import('../services/memoryEngine');
+    
+    getRecentConversationForMemory(ctx.user.id, 15)
+      .then(fullHistory => compressMemory(ctx.user.id, ctx.relationship.memory_summary, fullHistory))
+      .catch(err => console.error('[Ledger of Shadows] Trigger error:', err));
+  }
+
   return {
     reply_text: response,
   };

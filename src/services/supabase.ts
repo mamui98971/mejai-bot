@@ -136,6 +136,24 @@ export async function getConversationHistory(
   return ((data as ConversationEntry[]) || []).reverse();
 }
 
+/**
+ * Get extended conversation history for memory compression (bypasses tier limits).
+ */
+export async function getRecentConversationForMemory(
+  userId: string,
+  limit: number = 15
+): Promise<ConversationEntry[]> {
+  const { data } = await supabase
+    .from('conversation_history')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  // Reverse to chronological order
+  return ((data as ConversationEntry[]) || []).reverse();
+}
+
 // ============================================================
 // DATA LOGS (Expenses, Diet, Schedule)
 // ============================================================
@@ -242,13 +260,14 @@ export async function updateAffinityScore(
  */
 export async function updateUserPersona(
   userId: string,
-  persona: { bot_name: string; bot_gender: string; bot_personality: string }
+  persona: { bot_name: string; bot_gender: string; bot_age: number; bot_personality: string }
 ): Promise<UserRelationship> {
   const { data, error } = await supabase
     .from('user_relationships')
     .update({
       bot_name: persona.bot_name,
       bot_gender: persona.bot_gender,
+      bot_age: persona.bot_age,
       bot_personality: persona.bot_personality,
       is_onboarded: true,
     })
@@ -258,6 +277,53 @@ export async function updateUserPersona(
 
   if (error || !data) throw new Error(`Failed to update persona: ${error?.message}`);
   return data as UserRelationship;
+}
+
+/**
+ * Update the user's advanced settings and AI persona settings.
+ */
+export async function updateUserSettings(
+  userId: string,
+  userProfile: Partial<User>,
+  aiPersona: Partial<UserRelationship>
+): Promise<{ user: User; relationship: UserRelationship }> {
+  
+  // 1. Update users table
+  const { data: updatedUser, error: userError } = await supabase
+    .from('users')
+    .update({
+      display_name: userProfile.display_name,
+      birthdate: userProfile.birthdate,
+      age: userProfile.age,
+      gender: userProfile.gender,
+      weight: userProfile.weight,
+      height: userProfile.height,
+      goal: userProfile.goal,
+    })
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (userError || !updatedUser) throw new Error(`Failed to update user: ${userError?.message}`);
+
+  // 2. Update user_relationships table
+  const { data: updatedRel, error: relError } = await supabase
+    .from('user_relationships')
+    .update({
+      bot_name: aiPersona.bot_name,
+      bot_age: aiPersona.bot_age,
+      bot_personality: aiPersona.bot_personality,
+    })
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  if (relError || !updatedRel) throw new Error(`Failed to update relationship: ${relError?.message}`);
+
+  return {
+    user: updatedUser as User,
+    relationship: updatedRel as UserRelationship,
+  };
 }
 
 /**
@@ -282,6 +348,7 @@ export async function resetUserPersona(userId: string): Promise<void> {
       bot_gender: 'female',
       bot_personality: 'ผู้ช่วยส่วนตัวและเพื่อนสนิทที่คอยดูแลสุขภาพ การเงิน และตารางงานให้ผู้ใช้ นิสัยน่ารัก ขี้อ้อน และเอาใจใส่',
       is_onboarded: false,
+      memory_summary: '',
     })
     .eq('user_id', userId);
 }

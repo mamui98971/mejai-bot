@@ -72,7 +72,12 @@ export const COMMAND_PATTERNS: CommandPattern[] = [
   {
     pattern: /^\/?(รีเซ็?ตระบบ|รีเซ็?ต|ลบตัวละคร|เปลี่ยนตัวละคร|ล้างข้อมูล|reset)$/i,
     intent: Intent.RESET_PERSONA,
-    description: 'Reset persona and affinity shortcut',
+    description: 'Reset persona request shortcut',
+  },
+  {
+    pattern: /^ยืนยันการลบตัวละคร$/i,
+    intent: Intent.RESET_PERSONA_CONFIRM,
+    description: 'Confirm reset persona',
   },
 ];
 

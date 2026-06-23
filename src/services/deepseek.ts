@@ -58,6 +58,7 @@ export async function classifyIntent(
 - nutrition_summary: User wants nutrition/diet summary
 - status_check: User asks about relationship status or profile
 - reset_persona: User EXPLICITLY COMMANDS to reset, delete memory, or change character. Do NOT use this if the user is just asking a question about how to change the character.
+- update_profile: User mentions updating their weight, height, personal info, or dietary goal (e.g. น้ำหนัก, ส่วนสูง, ลดน้ำหนัก, อ้วนขึ้น)
 - roleplay: General conversation, emotional chat, flirting, casual talk
 
 Respond in JSON format: {"intent": "<intent_name>", "confidence": <0.0-1.0>}
