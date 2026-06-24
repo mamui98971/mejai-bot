@@ -171,25 +171,26 @@ export function Dashboard({ data }: DashboardProps) {
         )}
       </div>
 
-      {/* Floating Back to Chat Button */}
+      {/* Full-width Back to Chat Button */}
       <div 
         onClick={() => liff.closeWindow()}
         style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '24px',
-          background: 'var(--primary)',
-          color: '#FFF',
+          background: '#1C1C1E',
+          color: '#FFFFFF',
           padding: '16px',
-          borderRadius: '50%',
-          boxShadow: '0 8px 24px rgba(10, 132, 255, 0.4)',
+          borderRadius: '16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          zIndex: 100
+          marginTop: '16px',
+          marginBottom: '24px',
+          fontWeight: '700',
+          fontSize: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          transition: 'transform 0.2s'
         }}>
-        <MessageCircle size={28} />
+        กลับไปคุยกับ {relationship?.bot_name || 'เมใจ'}
       </div>
     </div>
   );
