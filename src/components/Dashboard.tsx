@@ -102,17 +102,17 @@ export function Dashboard({ data }: DashboardProps) {
                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                        transform: 'translateY(0)'
                    }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1 }}>
-                       {item.is_done ? (
-                         <div style={{ background: 'rgba(52, 199, 89, 0.1)', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <CheckCircle2 size={18} color="var(--success-green)" strokeWidth={2.5} />
-                         </div>
-                       ) : (
-                         <div style={{ padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                           <Circle size={22} color="#D1D1D6" strokeWidth={2} />
-                         </div>
-                       )}
-                       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                         {item.is_done ? (
+                           <div style={{ background: 'rgba(52, 199, 89, 0.1)', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <CheckCircle2 size={18} color="var(--success-green)" strokeWidth={2.5} />
+                           </div>
+                         ) : (
+                           <div style={{ padding: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                             <Circle size={22} color="#D1D1D6" strokeWidth={2} />
+                           </div>
+                         )}
                          <span style={{ 
                            fontWeight: item.is_done ? '500' : '600', 
                            fontSize: '15px',
@@ -123,10 +123,10 @@ export function Dashboard({ data }: DashboardProps) {
                          }}>
                            {item.title}
                          </span>
-                         <span style={{ fontSize: '12px', color: item.is_done ? '#D1D1D6' : (isPastDay ? '#FF3B30' : 'var(--primary)'), fontWeight: '600' }}>
-                           {formatted} น.
-                         </span>
                        </div>
+                       <span style={{ fontSize: '12px', color: item.is_done ? '#D1D1D6' : (isPastDay ? '#FF3B30' : 'var(--primary)'), fontWeight: '600', flexShrink: 0 }}>
+                         {formatted} น.
+                       </span>
                      </div>
                    </div>
                  );
