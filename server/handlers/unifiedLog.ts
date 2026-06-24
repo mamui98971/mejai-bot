@@ -16,6 +16,7 @@ import { calculateTDEE, getTodayCalories } from './nutrition';
 import { HEALTH } from '../config/constants';
 
 interface UnifiedPayload {
+  is_eating_it: boolean | null;
   expense: ExpensePayload;
   diet: DietPayload;
 }
@@ -34,6 +35,7 @@ CURRENT TIME: ${ctx.server_timestamp}
 
 Respond ONLY in JSON format:
 {
+  "is_eating_it": <boolean or null: true if user says they eat it, false if they bought for someone else, null if ambiguous/unspecified like just "ซื้อ">,
   "expense": {
     "amount": <number>,
     "category": "<food|transport|shopping|entertainment|health|bills|education|uncategorized>",
@@ -74,29 +76,38 @@ Rules:
       throw new Error('Incomplete unified extraction');
     }
 
-    // Save to database (Expense)
+    // Always save the expense
     await insertDataLog(ctx.user.id, LogType.EXPENSE, extracted.expense as any);
-    
-    // Save to database (Diet)
-    await insertDataLog(ctx.user.id, LogType.DIET, extracted.diet as any);
-
-    // Save conversation turn
     await saveConversationTurn(ctx.user.id, ConversationRole.USER, message);
 
-    // Calculate TDEE and today's calories
-    const tdee = calculateTDEE(ctx.user);
-    const todayCalories = await getTodayCalories(ctx.user.id);
-    const remaining = tdee - todayCalories; // todayCalories already includes the newly inserted diet log
+    let contextHint = '';
 
-    // Build Mejai's response
-    let contextHint = `บันทึกข้อมูลเรียบร้อยแล้ว:\n`;
-    contextHint += `- รายจ่าย: ${extracted.expense.amount} บาท (หมวด${extracted.expense.category})\n`;
-    contextHint += `- อาหาร: ${extracted.diet.food_name} (${extracted.diet.calories} kcal, P:${extracted.diet.protein}g, C:${extracted.diet.carbs}g, F:${extracted.diet.fats}g, Na:${extracted.diet.sodium}mg)\n\n`;
-    contextHint += `เป้าหมายผู้ใช้: ${ctx.user.goal || 'สมส่วน'}, โควต้าแคลอรี่ที่แนะนำต่อวัน: ${tdee} kcal, กินไปแล้ววันนี้: ${todayCalories} kcal, เหลือโควต้าอีก: ${remaining} kcal. 
+    if (extracted.is_eating_it === false) {
+      // User explicitly bought for someone else
+      contextHint = `บันทึกรายจ่ายเรียบร้อยแล้ว: ${extracted.expense.amount} บาท (ซื้อ ${extracted.diet.food_name})\n`;
+      contextHint += `ผู้ใช้ไม่ได้กินเอง (อาจจะซื้อให้คนอื่น) พูดคุยอย่างเป็นธรรมชาติ ชื่นชมความใจดี หรือแซวเบาๆ ว่าไม่ได้กินเองก็ดีแล้วจะได้ไม่หลุดเป้าหมาย`;
+    } else if (extracted.is_eating_it === null) {
+      // Ambiguous if they ate it or not
+      contextHint = `บันทึกรายจ่ายเรียบร้อยแล้ว: ${extracted.expense.amount} บาท (ซื้อ ${extracted.diet.food_name})\n`;
+      contextHint += `เนื่องจากผู้ใช้บอกแค่ว่า "ซื้อ" แต่ไม่ได้บอกว่า "กิน" ให้ถามผู้ใช้อย่างน่ารักว่า "อันนี้กินเองรึเปล่าคะ ริก้าจะได้บันทึกแคลอรี่ให้ด้วยเลย?"`;
+    } else {
+      // Save the diet log too
+      await insertDataLog(ctx.user.id, LogType.DIET, extracted.diet as any);
+
+      // Calculate TDEE and today's calories
+      const tdee = calculateTDEE(ctx.user);
+      const todayCalories = await getTodayCalories(ctx.user.id);
+      const remaining = tdee - todayCalories;
+
+      contextHint = `บันทึกข้อมูลเรียบร้อยแล้ว:\n`;
+      contextHint += `- รายจ่าย: ${extracted.expense.amount} บาท (หมวด${extracted.expense.category})\n`;
+      contextHint += `- อาหาร: ${extracted.diet.food_name} (${extracted.diet.calories} kcal, P:${extracted.diet.protein}g, C:${extracted.diet.carbs}g, F:${extracted.diet.fats}g, Na:${extracted.diet.sodium}mg)\n\n`;
+      contextHint += `เป้าหมายผู้ใช้: ${ctx.user.goal || 'สมส่วน'}, โควต้าแคลอรี่ที่แนะนำต่อวัน: ${tdee} kcal, กินไปแล้ววันนี้: ${todayCalories} kcal, เหลือโควต้าอีก: ${remaining} kcal. 
 พูดคุยให้กำลังใจตามเป้าหมายของเขาอย่างเป็นธรรมชาติ โดยรวบยอดทั้งเรื่องเงินและเรื่องอาหารไว้ด้วยกัน`;
 
-    if (extracted.diet.sodium > HEALTH.SODIUM_DAILY_CAP_MG) {
-      contextHint += `\n⚠️ WATER_RETENTION_ALERT: แค่มื้อนี้ก็โซเดียมเกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! เตือนผู้ใช้เรื่องบวมน้ำอย่างน่ารัก`;
+      if (extracted.diet.sodium > HEALTH.SODIUM_DAILY_CAP_MG) {
+        contextHint += `\n⚠️ WATER_RETENTION_ALERT: แค่มื้อนี้ก็โซเดียมเกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! เตือนผู้ใช้เรื่องบวมน้ำอย่างน่ารัก`;
+      }
     }
 
     const replyPrompt = [
