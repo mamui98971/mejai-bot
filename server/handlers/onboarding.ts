@@ -2,41 +2,56 @@
 // PROJECT MEJAI — Onboarding & Custom Persona Setup
 // ============================================================
 
-import { MejaiContext, HandlerResult, DeepSeekMessage } from '../types';
+import { MejaiContext, HandlerResult, DeepSeekMessage, ConversationRole } from '../types';
 import { chat } from '../services/deepseek';
-import { updateUserPersona } from '../services/supabase';
+import { updateUserPersona, getConversationHistory, saveConversationTurn } from '../services/supabase';
 
 export async function handleOnboarding(
   userMessage: string,
   ctx: MejaiContext
 ): Promise<HandlerResult> {
-  const systemPrompt = `You are an onboarding assistant for a LINE chatbot.
-The user needs to set up the chatbot's persona (Name, Gender, Personality/Character).
-Your goal is to extract these details from the user's message.
-If the user hasn't provided enough information (e.g., they just said "Hello"), greet them nicely and ask what they want to name the bot, what gender, and what personality or character they want to roleplay.
-If the user provides the information, extract it and confirm it.
+  const systemPrompt = `You are a strict but creative casting director and psychologist for a LINE chatbot.
+The user wants to create a custom AI character persona (Name, Gender, Personality/Background).
+Your goal is to interview the user, understand their exact needs, and set up the persona.
+
+CRITICAL RULES (CLARIFICATION & CONFIRMATION):
+1. If the user provides a brief or ambiguous name (e.g., "Ayanokoji", "Senku", "Gojo"), DO NOT immediately assume and create the character.
+2. You MUST set "is_complete": false and ask for clarification in "reply_text".
+   - Example: "หมายถึง อายาโนะโคจิ คิโยทากะ จาก Classroom of the Elite ใช่ไหมคะ? อยากให้ดึงนิสัยเย็นชามา 100% เลย หรืออยากปรับให้ซอฟต์ลงหน่อยไหม?"
+3. Only set "is_complete": true when the user explicitly confirms or provides enough detail to lock in the character design.
+
+When "is_complete" is true, you must provide a highly detailed "bot_personality" that expands on the character's background, catchphrases, tone, and traits. Also assign an accurate "bot_mbti" (4 letters).
 
 Respond ONLY in JSON format:
 {
-  "is_complete": boolean, // true if you have enough info to set the persona
+  "is_complete": boolean,
   "extracted": {
-    "bot_name": "string", // The actual character's name (e.g. "เซนคู")
+    "bot_name": "string",
     "bot_gender": "female" | "male" | "other",
-    "bot_age": number, // The character's age (e.g. 18). Guess if not provided.
-    "bot_personality": "string", // VERY IMPORTANT: If the user names a famous character (e.g., from an anime or movie), write a highly detailed persona prompt describing their specific tone, catchphrases, attitude, and background. Do NOT just copy the user's message. E.g., if Senku, write "เป็นคนฉลาด มั่นใจในตัวเอง ชอบพูดคำว่า '10 พันล้านเปอร์เซ็นต์' มีความรู้เรื่องวิทยาศาสตร์ พูดจาห้าวๆ แบบผู้ชาย"
-    "bot_mbti": "string" // Analyze the personality and assign the most accurate MBTI type (e.g. INTJ, ENFP). Must be exactly 4 letters.
+    "bot_age": number,
+    "bot_personality": "string", // Detailed persona prompt if complete
+    "bot_mbti": "string"
   },
-  "reply_text": "string" // Reply fully IN CHARACTER of the new persona. If it's Senku, reply like Senku would. Do NOT reply like a generic polite assistant.
-}
-
-Current User Message: ${userMessage}
-`;
-
-  const messages: DeepSeekMessage[] = [
-    { role: 'system', content: systemPrompt },
-  ];
+  "reply_text": "string" // The message you send back to the user. If is_complete=false, act as the casting director asking questions. If is_complete=true, act FULLY IN CHARACTER of the newly created persona!
+}`;
 
   try {
+    // 1. Fetch recent conversation history (last 5 turns) to prevent "goldfish memory"
+    const rawHistory = await getConversationHistory(ctx.user.id, 5);
+    const messages: DeepSeekMessage[] = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    // Append history
+    for (const h of rawHistory) {
+      messages.push({
+        role: h.role === ConversationRole.USER ? 'user' : 'assistant',
+        content: h.content
+      });
+    }
+
+    // Append current message
+    messages.push({ role: 'user', content: userMessage });
     const response = await chat(messages, {
       temperature: 0.3,
       max_tokens: 500,
@@ -57,8 +72,14 @@ Current User Message: ${userMessage}
       await updateUserPersona(ctx.user.id, persona);
     }
 
+    const replyText = parsed.reply_text || 'การตั้งค่าเสร็จสมบูรณ์เรียบร้อย';
+
+    // Save the conversation turns so the AI remembers this step
+    await saveConversationTurn(ctx.user.id, ConversationRole.USER, userMessage);
+    await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, replyText);
+
     return {
-      reply_text: parsed.reply_text || 'การตั้งค่าเสร็จสมบูรณ์เรียบร้อย',
+      reply_text: replyText,
     };
   } catch (error) {
     console.error('❌ Onboarding Error:', error);
