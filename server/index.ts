@@ -12,7 +12,7 @@ import { routeIntent, isTextEvent, getEventText } from './router/intentRouter';
 import { handleRoleplay } from './handlers/roleplay';
 import { handleExpenseLog, handleExpenseSummary } from './handlers/expense';
 import { handleUnifiedLog } from './handlers/unifiedLog';
-import { handleScheduleCreate, handleScheduleList } from './handlers/secretary';
+import { handleScheduleCreate, handleScheduleList, handleScheduleDone } from './handlers/secretary';
 import { handleNutritionLog, handleNutritionSummary } from './handlers/nutrition';
 import { handleHoroscope } from './handlers/horoscope';
 import { handleStatusCheck, processAffinityUpdate } from './handlers/relationship';
@@ -184,7 +184,7 @@ app.post(
               reply = (await handleScheduleList(ctx)).reply_text;
               break;
             case Intent.SCHEDULE_DONE:
-              reply = "การทำเครื่องหมายว่าเสร็จแล้ว ทำได้ผ่านปุ่มในแดชบอร์ดนะคะ";
+              reply = (await handleScheduleDone(text, ctx)).reply_text;
               break;
 
             // Phase 4 handlers

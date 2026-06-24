@@ -162,3 +162,27 @@ export async function handleScheduleList(
   const reply = await chat(replyPrompt, { temperature: 0.7, max_tokens: 512 });
   return { reply_text: reply };
 }
+
+/**
+ * Handle schedule done intent
+ * Uses AI to respond in character and instruct user to use the dashboard
+ */
+export async function handleScheduleDone(
+  message: string,
+  ctx: MejaiContext
+): Promise<HandlerResult> {
+  await saveConversationTurn(ctx.user.id, ConversationRole.USER, message);
+
+  const prompt = [
+    {
+      role: 'system' as const,
+      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้บอกว่าทำบางอย่างเสร็จแล้ว หรือบอกว่างานเสร็จแล้ว ให้ตอบรับตามคาแรคเตอร์ และบอกผู้ใช้เนียนๆ ว่า "ถ้าเป็นนัดหมายหรือตารางงานที่ตั้งไว้ในระบบ ให้ไปกดทำเครื่องหมายว่าเสร็จสิ้นผ่านหน้าแดชบอร์ดด้วยนะ" (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+    },
+    { role: 'user' as const, content: message },
+  ];
+
+  const reply = await chat(prompt, { temperature: 0.8, max_tokens: 200 });
+  await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, reply);
+
+  return { reply_text: reply };
+}
