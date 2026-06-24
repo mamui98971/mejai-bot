@@ -34,6 +34,7 @@ export enum Intent {
   HOROSCOPE = 'horoscope',
   SCHEDULE_CREATE = 'schedule_create',
   SCHEDULE_LIST = 'schedule_list',
+  SCHEDULE_DONE = 'schedule_done',
   EXPENSE_LOG = 'expense_log',
   EXPENSE_SUMMARY = 'expense_summary',
   NUTRITION_LOG = 'nutrition_log',

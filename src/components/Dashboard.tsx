@@ -81,7 +81,10 @@ export function Dashboard({ data }: DashboardProps) {
             <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {localToday.map((item, idx) => {
                  const date = new Date(item.datetime_iso);
-                 const formatted = date.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' });
+                 const isPastDay = date.toDateString() !== new Date().toDateString();
+                 const formatted = isPastDay 
+                   ? date.toLocaleString('th-TH', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                   : date.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' });
                  return (
                    <div 
                      key={idx} 
@@ -114,13 +117,13 @@ export function Dashboard({ data }: DashboardProps) {
                            fontWeight: item.is_done ? '500' : '600', 
                            fontSize: '16px',
                            letterSpacing: '-0.3px',
-                           color: item.is_done ? '#A1A1A6' : '#1C1C1E',
+                           color: item.is_done ? '#A1A1A6' : (isPastDay ? '#FF3B30' : '#1C1C1E'),
                            textDecoration: item.is_done ? 'line-through' : 'none',
                            transition: 'all 0.2s'
                          }}>
                            {item.title}
                          </span>
-                         <span style={{ fontSize: '13px', color: item.is_done ? '#D1D1D6' : 'var(--primary)', fontWeight: '600' }}>
+                         <span style={{ fontSize: '13px', color: item.is_done ? '#D1D1D6' : (isPastDay ? '#FF3B30' : 'var(--primary)'), fontWeight: '600' }}>
                            {formatted} น.
                          </span>
                        </div>

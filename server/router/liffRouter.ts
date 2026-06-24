@@ -110,12 +110,20 @@ liffRouter.get('/me', async (req, res) => {
             is_done: isDone
           };
 
+          const endOfToday = new Date(today);
+          endOfToday.setHours(23, 59, 59, 999);
+
           const eventDateString = eventDate.toDateString();
           const todayString = today.toDateString();
 
           if (eventDateString === todayString) {
+            // Scheduled for today
             todaySchedules.push(scheduleObj);
-          } else if (eventDate > today) {
+          } else if (!isDone && eventDate < today) {
+            // Overdue and not done, roll over to today
+            todaySchedules.push(scheduleObj);
+          } else if (eventDate > endOfToday) {
+            // Future upcoming
             upcomingSchedules.push(scheduleObj);
           }
         }
@@ -124,6 +132,7 @@ liffRouter.get('/me', async (req, res) => {
     
     todaySchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
     upcomingSchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
+    const limitedUpcoming = upcomingSchedules.slice(0, 5);
 
     res.json({
       user: {
@@ -154,7 +163,7 @@ liffRouter.get('/me', async (req, res) => {
         dailySodium
       },
       todaySchedules,
-      upcomingSchedules: upcomingSchedules.slice(0, 5) // Return up to 5 upcoming items
+      upcomingSchedules: limitedUpcoming
     });
 
   } catch (err) {

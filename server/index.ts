@@ -11,7 +11,7 @@ import { resolveEventContext } from './middleware/userResolver';
 import { routeIntent, isTextEvent, getEventText } from './router/intentRouter';
 import { handleRoleplay } from './handlers/roleplay';
 import { handleExpenseLog, handleExpenseSummary } from './handlers/expense';
-import { handleScheduleCreate, handleScheduleList } from './handlers/secretary';
+import { handleScheduleCreate, handleScheduleList, handleScheduleDone } from './handlers/secretary';
 import { handleNutritionLog, handleNutritionSummary } from './handlers/nutrition';
 import { handleHoroscope } from './handlers/horoscope';
 import { handleStatusCheck, processAffinityUpdate } from './handlers/relationship';
@@ -178,6 +178,9 @@ app.post(
               break;
             case Intent.SCHEDULE_LIST:
               reply = (await handleScheduleList(ctx)).reply_text;
+              break;
+            case Intent.SCHEDULE_DONE:
+              reply = (await handleScheduleDone(text, ctx)).reply_text;
               break;
 
             // Phase 4 handlers
