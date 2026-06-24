@@ -24,7 +24,7 @@ Your job is to read the recent conversation transcript and the EXISTING memory s
 
 You must output STRICTLY in JSON format with two keys: "summary" (string) and "traits" (object).
 
-1. "summary": A concise paragraph extracting BOTH everyday mundane facts (profession, hobbies, daily routines) AND deep/dark secrets (sexual preferences, kinks, fetishes, dark secrets, vulnerabilities). DO NOT include conversational filler.
+1. "summary": A concise paragraph extracting everyday mundane facts, deep/dark secrets, AND specifically capturing any "RECENT MICRO-DETAIL" (e.g., user is sick today, waiting for a parcel, just woke up). Prefix these specific minor details with "RECENT MICRO-DETAIL:" so the bot can mention them naturally in the next chat. DO NOT include conversational filler.
 2. "traits": A detailed psychological and behavioral profile of the user based on the transcript. Rate or describe the following attributes clearly:
   - "dominance": Level of dominance (e.g., Submissive, Switch, Dominant, Master)
   - "flirtatiousness": How flirty or sexually forward they are (e.g., Shy, Teasing, Aggressive, Horny)
