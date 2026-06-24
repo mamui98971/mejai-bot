@@ -24,7 +24,7 @@ import { incrementMessageCount, resetUserPersona } from './services/supabase';
 import { handlePaymentWebhook } from './services/omise';
 import { Intent } from './types';
 import { UPSELL_MESSAGES } from './config/constants';
-import { checkAndSendReminders } from './cron/scheduleNotifier.js';
+// import removed
 import { resetDailyLimits } from './cron/resetDailyLimits';
 
 const app = express();
@@ -249,8 +249,8 @@ app.post(
 
 // ---- Start Server (local dev) ----
 if (env.NODE_ENV !== 'production') {
-  // Local cron fallback
-  startScheduleNotifier();
+  // Local cron fallback disabled
+  // startScheduleNotifier();
   
   app.listen(env.PORT, () => {
     console.log(`\n🔮 Mejai is awakening on port ${env.PORT}...`);

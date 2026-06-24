@@ -80,7 +80,7 @@ async function setupRichMenu() {
 
     console.log('📤 กำลังอัปโหลดรูปภาพขึ้นเซิร์ฟเวอร์ LINE...');
     // Create blob representing the image
-    const blob = new Blob([imageBuffer], { type: 'image/png' });
+    const blob = new Blob([imageBuffer as unknown as BlobPart], { type: 'image/png' });
     await clientBlob.setRichMenuImage(richMenuId, blob);
     console.log('✅ อัปโหลดรูปภาพสำเร็จ!');
 
