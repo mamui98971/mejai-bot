@@ -142,17 +142,20 @@ export function parseThaiDate(
  * Format a Date to a Thai-friendly string.
  */
 export function formatThaiDate(date: Date): string {
+  // Fix timezone bug: convert to +07:00 manually to avoid server local time issues
+  const bkkDate = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+  
   const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
   const thaiMonths = [
     'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.',
     'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.',
   ];
 
-  const dayName = thaiDays[date.getDay()];
-  const day = date.getDate();
-  const month = thaiMonths[date.getMonth()];
-  const hours = date.getHours().toString().padStart(2, '0');
-  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const dayName = thaiDays[bkkDate.getUTCDay()];
+  const day = bkkDate.getUTCDate();
+  const month = thaiMonths[bkkDate.getUTCMonth()];
+  const hours = bkkDate.getUTCHours().toString().padStart(2, '0');
+  const minutes = bkkDate.getUTCMinutes().toString().padStart(2, '0');
 
   return `วัน${dayName}ที่ ${day} ${month} เวลา ${hours}:${minutes} น.`;
 }

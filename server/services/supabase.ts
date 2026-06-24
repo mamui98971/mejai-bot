@@ -47,8 +47,8 @@ export async function findOrCreateUser(
 
   if (existingUser) {
     user = existingUser as User;
-    // Update display name if changed
-    if (displayName && displayName !== user.display_name) {
+    // Only update display name if it's currently null, to preserve custom names set via the Settings dashboard
+    if (displayName && !user.display_name) {
       await supabase
         .from('users')
         .update({ display_name: displayName })

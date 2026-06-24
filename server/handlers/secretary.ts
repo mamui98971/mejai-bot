@@ -28,11 +28,12 @@ export async function handleScheduleCreate(
   message: string,
   ctx: MejaiContext
 ): Promise<HandlerResult> {
+  const formattedNow = formatThaiDate(new Date(ctx.server_timestamp));
   const extractionPrompt = [
     {
       role: 'system' as const,
       content: `You are a schedule extraction engine for a Thai personal assistant.
-CURRENT TIME: ${ctx.server_timestamp}
+CURRENT TIME: ${formattedNow} (Timezone: Asia/Bangkok +07:00)
 
 Extract schedule information from the user's message.
 Respond ONLY in JSON format:
