@@ -124,7 +124,7 @@ export function Dashboard({ data }: DashboardProps) {
                            {item.title}
                          </span>
                        </div>
-                       <span style={{ fontSize: '12px', color: item.is_done ? '#D1D1D6' : (isPastDay ? '#FF3B30' : 'var(--primary)'), fontWeight: '600', flexShrink: 0 }}>
+                       <span style={{ fontSize: '13px', color: item.is_done ? '#A1A1A6' : (isPastDay ? '#FF3B30' : '#1C1C1E'), fontWeight: '600', flexShrink: 0 }}>
                          {formatted} น.
                        </span>
                      </div>
