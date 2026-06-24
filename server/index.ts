@@ -11,6 +11,7 @@ import { resolveEventContext } from './middleware/userResolver';
 import { routeIntent, isTextEvent, getEventText } from './router/intentRouter';
 import { handleRoleplay } from './handlers/roleplay';
 import { handleExpenseLog, handleExpenseSummary } from './handlers/expense';
+import { handleUnifiedLog } from './handlers/unifiedLog';
 import { handleScheduleCreate, handleScheduleList } from './handlers/secretary';
 import { handleNutritionLog, handleNutritionSummary } from './handlers/nutrition';
 import { handleHoroscope } from './handlers/horoscope';
@@ -172,6 +173,9 @@ app.post(
               break;
             case Intent.NUTRITION_SUMMARY:
               reply = (await handleNutritionSummary(ctx)).reply_text;
+              break;
+            case Intent.EXPENSE_AND_NUTRITION_LOG:
+              reply = (await handleUnifiedLog(text, ctx)).reply_text;
               break;
             case Intent.SCHEDULE_CREATE:
               reply = (await handleScheduleCreate(text, ctx)).reply_text;

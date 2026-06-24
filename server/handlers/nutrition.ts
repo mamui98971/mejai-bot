@@ -17,6 +17,7 @@ import {
   LogType,
   ConversationRole,
   DietPayload,
+  User,
 } from '../types';
 import { HEALTH } from '../config/constants';
 
@@ -71,8 +72,14 @@ Rules:
     // Check 24-hour rolling sodium
     const sodiumAlert = await checkSodiumLevel(ctx);
 
+    // Calculate TDEE and today's calories
+    const tdee = calculateTDEE(ctx.user);
+    const todayCalories = await getTodayCalories(ctx.user.id);
+    const remaining = tdee - todayCalories;
+
     // Build Mejai's response
-    let contextHint = `บันทึกอาหารแล้ว: ${extracted.food_name} (${extracted.calories} kcal, P:${extracted.protein}g, C:${extracted.carbs}g, F:${extracted.fats}g, Na:${extracted.sodium}mg)`;
+    let contextHint = `บันทึกอาหารแล้ว: ${extracted.food_name} (${extracted.calories} kcal, P:${extracted.protein}g, C:${extracted.carbs}g, F:${extracted.fats}g, Na:${extracted.sodium}mg)\n`;
+    contextHint += `เป้าหมายผู้ใช้: ${ctx.user.goal || 'สมส่วน'}, โควต้าแคลอรี่ที่แนะนำต่อวัน: ${tdee} kcal, กินไปแล้ววันนี้: ${todayCalories} kcal, เหลือโควต้าอีก: ${remaining} kcal. พูดคุยให้กำลังใจตามเป้าหมายของเขาอย่างเป็นธรรมชาติ`;
 
     if (sodiumAlert) {
       contextHint += `\n⚠️ WATER_RETENTION_ALERT: โซเดียมวันนี้เกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! (รวม ${sodiumAlert.totalSodium}mg) เตือนผู้ใช้เรื่องบวมน้ำและดื่มน้ำเยอะๆ อย่างน่ารักแต่จริงจัง`;
@@ -135,6 +142,45 @@ async function checkSodiumLevel(
 }
 
 /**
+ * Helper to calculate TDEE based on user profile.
+ */
+export function calculateTDEE(user: User): number {
+  const weight = user.weight || 65;
+  const height = user.height || 170;
+  const age = user.age || 30;
+  const gender = (user.gender || 'male').toLowerCase();
+  
+  let bmr = 10 * weight + 6.25 * height - 5 * age;
+  bmr += (gender === 'female' || gender === 'หญิง') ? -161 : 5;
+  
+  // Sedentary multiplier (1.2)
+  const tdee = bmr * 1.2;
+  
+  // Adjust based on goal
+  const goal = user.goal || 'สมส่วน';
+  if (goal === 'ผอม') return Math.round(tdee - 500);
+  if (goal === 'อ้วน') return Math.round(tdee + 500);
+  return Math.round(tdee);
+}
+
+/**
+ * Helper to get total calories eaten today.
+ */
+export async function getTodayCalories(userId: string): Promise<number> {
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString();
+
+  const logs = await queryDataLogs(userId, LogType.DIET, startOfDay, endOfDay);
+  let total = 0;
+  for (const log of logs) {
+    const p = log.payload as DietPayload;
+    total += p.calories || 0;
+  }
+  return total;
+}
+
+/**
  * Handle nutrition summary request.
  * Shows today's macro totals and progress.
  */
@@ -186,9 +232,12 @@ export async function handleNutritionSummary(
     ? `\n⚠️ โซเดียมเกิน! (${totalSodium}/${HEALTH.SODIUM_DAILY_CAP_MG}mg) เตือนเรื่องบวมน้ำและดื่มน้ำเยอะ`
     : '';
 
+  const tdee = calculateTDEE(ctx.user);
+  const remaining = tdee - totalCalories;
+
   const summaryText = `🥗 สรุปอาหารวันนี้\n
 กินไป: ${foods.join(', ')}\n
-🔥 แคลอรี่: ${totalCalories} kcal
+🔥 แคลอรี่: ${totalCalories} kcal (เป้าหมาย: ${tdee} kcal, เหลือ: ${remaining} kcal)
 🥩 โปรตีน: ${totalProtein}g
 🍞 คาร์บ: ${totalCarbs}g
 🧈 ไขมัน: ${totalFats}g

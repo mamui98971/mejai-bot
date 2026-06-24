@@ -39,6 +39,7 @@ export enum Intent {
   EXPENSE_SUMMARY = 'expense_summary',
   NUTRITION_LOG = 'nutrition_log',
   NUTRITION_SUMMARY = 'nutrition_summary',
+  EXPENSE_AND_NUTRITION_LOG = 'expense_and_nutrition_log',
   UPDATE_PROFILE = 'update_profile',
   ROLEPLAY = 'roleplay',
   STATUS_CHECK = 'status_check',
