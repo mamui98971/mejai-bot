@@ -260,7 +260,7 @@ export async function updateAffinityScore(
  */
 export async function updateUserPersona(
   userId: string,
-  persona: { bot_name: string; bot_gender: string; bot_age: number; bot_personality: string; bot_mbti?: string }
+  persona: { bot_name: string; bot_gender: string; bot_age: number; bot_personality: string; bot_mbti?: string; custom_path?: string }
 ): Promise<UserRelationship> {
   const { data, error } = await supabase
     .from('user_relationships')
@@ -270,6 +270,7 @@ export async function updateUserPersona(
       bot_age: persona.bot_age,
       bot_personality: persona.bot_personality,
       bot_mbti: persona.bot_mbti,
+      personality_traits: { custom_path: persona.custom_path || 'romantic' },
       is_onboarded: true,
     })
     .eq('user_id', userId)
