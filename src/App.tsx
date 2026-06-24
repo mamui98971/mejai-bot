@@ -63,6 +63,15 @@ function App() {
     return (
       <div className="loader-container">
         <p className="warning-text">LIFF is not configured or the online API is unreachable.</p>
+        <button 
+          onClick={() => {
+            liff.logout();
+            window.location.reload();
+          }}
+          style={{ marginTop: '20px', padding: '10px 20px', background: '#1C1C1E', color: '#FFFFFF', borderRadius: '12px', fontWeight: '600' }}
+        >
+          รีเซ็ตการเข้าสู่ระบบ (Reset Login)
+        </button>
       </div>
     );
   }
