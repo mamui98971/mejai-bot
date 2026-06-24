@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { Wallet, CheckCircle2, Circle, MessageCircle } from 'lucide-react';
 import liff from '@line/liff';
 import { toggleScheduleDone } from '../api/client';
