@@ -53,10 +53,10 @@ export async function classifyIntent(
 - schedule_create: User wants to create/set a reminder, meeting, appointment, นัด, ตาราง, เตือน, ต้องทำ, ให้จำว่า, จำไว้ว่า
 - schedule_list: User wants to see their schedule/agenda, ขอดูตาราง, วันนี้มีนัดอะไรบ้าง, วันนี้มีทำอะไรบ้าง
 - schedule_done: User mentions finishing a task, completing an appointment, or asking to check off a schedule, เสร็จแล้ว, เรียบร้อย, ติ๊กให้หน่อย, ทำแล้ว
-- expense_and_nutrition_log: User mentions BOTH eating food AND spending money in the same message (e.g. กินหมูปิ้ง ซื้อมา 70 บาท, กินข้าว 50 บาท)
-- expense_log: User mentions ONLY spending money, paying, buying (จ่าย, ซื้อ, บาท) without eating
+- expense_and_nutrition_log: User mentions BOTH a food/drink item AND spending money (e.g. ซื้อข้าวหมูทอด 50 บาท, กินข้าว 50 บาท, ซื้อกาแฟ 60 บาท)
+- expense_log: User mentions spending money on NON-FOOD items, paying bills, shopping (e.g. จ่ายค่าไฟ 500, ซื้อของ 200 บาท)
 - expense_summary: User wants expense report/summary
-- nutrition_log: User mentions ONLY eating food, drinking, meals (กิน, ทาน, อาหาร) without spending money
+- nutrition_log: User mentions eating a food/drink item WITHOUT spending money (e.g. กินข้าวหมูทอด, ทานข้าว)
 - nutrition_summary: User wants nutrition/diet summary
 - status_check: User asks about relationship status or profile
 - reset_persona: User EXPLICITLY COMMANDS to reset, delete memory, or change character. Do NOT use this if the user is just asking a question about how to change the character.
