@@ -170,28 +170,6 @@ export function Dashboard({ data }: DashboardProps) {
           </div>
         )}
       </div>
-
-      {/* Full-width Back to Chat Button */}
-      <div 
-        onClick={() => liff.closeWindow()}
-        style={{
-          background: '#1C1C1E',
-          color: '#FFFFFF',
-          padding: '16px',
-          borderRadius: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          marginTop: '16px',
-          marginBottom: '24px',
-          fontWeight: '700',
-          fontSize: '16px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          transition: 'transform 0.2s'
-        }}>
-        กลับไปคุยกับ {relationship?.bot_name || 'เมใจ'}
-      </div>
     </div>
   );
 }
