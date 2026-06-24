@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Wallet, CheckCircle2, Circle, MessageCircle } from 'lucide-react';
 import liff from '@line/liff';
 import { toggleScheduleDone } from '../api/client';
@@ -23,6 +24,7 @@ export function Dashboard({ data }: DashboardProps) {
   const remainingBudget = (data.user.monthlyBudget || 0) - (stats.monthlyExpense || 0);
 
   const [localToday, setLocalToday] = useState(data.todaySchedules || []);
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
 
   useEffect(() => {
     setLocalToday(data.todaySchedules || []);
@@ -140,35 +142,57 @@ export function Dashboard({ data }: DashboardProps) {
           )}
         </div>
 
-        {data.upcomingSchedules && data.upcomingSchedules.length > 0 && (
-          <div className="schedule-section" style={{ marginTop: '32px', marginBottom: '24px' }}>
-            <div className="card-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>นัดหมายล่วงหน้า</h2>
-            </div>
-            <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {data.upcomingSchedules.map((item, idx) => {
-                 const date = new Date(item.datetime_iso);
-                 const formatted = date.toLocaleString('th-TH', { month: 'short', day: 'numeric' });
-                 return (
-                   <div key={`up-${idx}`} style={{ 
-                     display: 'flex', justifyContent: 'space-between', padding: '12px 16px', 
-                     background: '#F2F2F7',
-                     borderRadius: '14px',
-                     fontSize: '14px',
-                     alignItems: 'center',
-                     border: '1px solid rgba(0,0,0,0.02)'
-                   }}>
-                     <div style={{ color: '#666666', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '500' }}>
-                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1D1D6' }} />
-                       {item.title}
+        {data.upcomingSchedules && data.upcomingSchedules.length > 0 && (() => {
+          const upcomingToShow = showAllUpcoming 
+            ? data.upcomingSchedules 
+            : data.upcomingSchedules.slice(0, 3);
+            
+          return (
+            <div className="schedule-section" style={{ marginTop: '32px', marginBottom: '24px' }}>
+              <div className="card-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>นัดหมายล่วงหน้า</h2>
+              </div>
+              <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {upcomingToShow.map((item, idx) => {
+                   const date = new Date(item.datetime_iso);
+                   const formatted = date.toLocaleString('th-TH', { month: 'short', day: 'numeric' });
+                   return (
+                     <div key={`up-${idx}`} style={{ 
+                       display: 'flex', justifyContent: 'space-between', padding: '12px 16px', 
+                       background: '#F2F2F7',
+                       borderRadius: '14px',
+                       fontSize: '14px',
+                       alignItems: 'center',
+                       border: '1px solid rgba(0,0,0,0.02)'
+                     }}>
+                       <div style={{ color: '#666666', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '500' }}>
+                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1D1D6' }} />
+                         {item.title}
+                       </div>
+                       <div style={{ color: '#8E8E93', fontSize: '13px', fontWeight: '600' }}>{formatted}</div>
                      </div>
-                     <div style={{ color: '#8E8E93', fontSize: '13px', fontWeight: '600' }}>{formatted}</div>
-                   </div>
-                 );
-              })}
+                   );
+                })}
+              </div>
+              {data.upcomingSchedules.length > 3 && (
+                <div 
+                  onClick={() => setShowAllUpcoming(!showAllUpcoming)}
+                  style={{ 
+                    marginTop: '12px', 
+                    textAlign: 'center', 
+                    color: 'var(--primary)', 
+                    fontSize: '14px', 
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    padding: '8px 0'
+                  }}
+                >
+                  {showAllUpcoming ? 'ซ่อนนัดหมาย' : `ดูอีก ${data.upcomingSchedules.length - 3} รายการ`}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
