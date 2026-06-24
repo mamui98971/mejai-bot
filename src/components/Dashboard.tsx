@@ -112,7 +112,7 @@ export function Dashboard({ data }: DashboardProps) {
                            <Circle size={22} color="#D1D1D6" strokeWidth={2} />
                          </div>
                        )}
-                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0px' }}>
+                       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
                          <span style={{ 
                            fontWeight: item.is_done ? '500' : '600', 
                            fontSize: '15px',
