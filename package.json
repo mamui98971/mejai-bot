@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite & tsx watch server/index.ts",
     "typecheck": "tsc --noEmit",
-    "build": "vite build",
+    "build": "node node_modules/vite/bin/vite.js build",
     "start": "node dist/server/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
