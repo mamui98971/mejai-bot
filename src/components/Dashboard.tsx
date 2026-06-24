@@ -69,16 +69,16 @@ export function Dashboard({ data }: DashboardProps) {
         </div>
 
         <div className="schedule-section" style={{ marginTop: '24px' }}>
-          <div className="card-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600' }}>ตารางงานวันนี้</h2>
+          <div className="card-header" style={{ justifyContent: 'space-between', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '700', letterSpacing: '-0.5px' }}>วันนี้มีอะไรบ้าง?</h2>
+            {localToday.length > 0 && (
+              <span style={{ fontSize: '12px', background: 'var(--bg-color)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: '100px', fontWeight: '600' }}>
+                {localToday.filter((s: any) => s.is_done).length}/{localToday.length}
+              </span>
+            )}
           </div>
           {localToday.length > 0 ? (
-            <div className="schedule-list" style={{ 
-              background: '#FFFFFF', 
-              borderRadius: '12px',
-              border: '1px solid var(--surface-border)',
-              overflow: 'hidden'
-            }}>
+            <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {localToday.map((item, idx) => {
                  const date = new Date(item.datetime_iso);
                  const formatted = date.toLocaleString('th-TH', { hour: '2-digit', minute: '2-digit' });
@@ -87,70 +87,78 @@ export function Dashboard({ data }: DashboardProps) {
                      key={idx} 
                      onClick={() => handleToggle(item)}
                      style={{ 
-                       padding: '16px', 
-                       borderBottom: idx === localToday.length - 1 ? 'none' : '1px solid var(--surface-border)',
+                       background: item.is_done ? '#F9F9FB' : '#FFFFFF', 
+                       border: item.is_done ? '1px solid #F0F0F0' : '1px solid #EAEAEA',
+                       boxShadow: item.is_done ? 'none' : '0 4px 16px rgba(0,0,0,0.04)',
+                       borderRadius: '18px', 
+                       padding: '16px 20px', 
                        display: 'flex',
                        justifyContent: 'space-between',
                        alignItems: 'center',
                        cursor: 'pointer',
-                       transition: 'background 0.2s',
-                       backgroundColor: item.is_done ? '#FAFAFA' : '#FFFFFF'
+                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                       transform: 'translateY(0)'
                    }}>
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
                        {item.is_done ? (
-                         <CheckCircle2 size={22} color="var(--primary)" />
+                         <div style={{ background: 'rgba(52, 199, 89, 0.1)', borderRadius: '50%', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <CheckCircle2 size={20} color="var(--success-green)" strokeWidth={2.5} />
+                         </div>
                        ) : (
-                         <Circle size={22} color="#C7C7CC" />
+                         <div style={{ padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                           <Circle size={24} color="#D1D1D6" strokeWidth={2} />
+                         </div>
                        )}
-                       <div style={{ 
-                         fontWeight: item.is_done ? '400' : '500', 
-                         fontSize: '15px',
-                         color: item.is_done ? 'var(--text-muted)' : 'var(--text-main)',
-                         textDecoration: item.is_done ? 'line-through' : 'none'
-                       }}>
-                         {item.title}
+                       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                         <span style={{ 
+                           fontWeight: item.is_done ? '500' : '600', 
+                           fontSize: '16px',
+                           letterSpacing: '-0.3px',
+                           color: item.is_done ? '#A1A1A6' : '#1C1C1E',
+                           textDecoration: item.is_done ? 'line-through' : 'none',
+                           transition: 'all 0.2s'
+                         }}>
+                           {item.title}
+                         </span>
+                         <span style={{ fontSize: '13px', color: item.is_done ? '#D1D1D6' : 'var(--primary)', fontWeight: '600' }}>
+                           {formatted} น.
+                         </span>
                        </div>
-                     </div>
-                     <div style={{ fontSize: '13px', color: item.is_done ? 'var(--text-muted)' : 'var(--primary)', fontWeight: '500' }}>
-                       {formatted} น.
                      </div>
                    </div>
                  );
               })}
             </div>
           ) : (
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', padding: '16px', background: '#FAFAFA', borderRadius: '12px', border: '1px solid var(--surface-border)' }}>
+            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '14px', padding: '20px', background: '#FAFAFA', borderRadius: '16px', border: '1px dashed #E5E5EA' }}>
               วันนี้ว่างยาวๆ ไม่มีนัดเลยค่ะ 😴
             </div>
           )}
         </div>
 
         {data.upcomingSchedules && data.upcomingSchedules.length > 0 && (
-          <div className="schedule-section" style={{ marginTop: '24px', marginBottom: '24px' }}>
-            <div className="card-header" style={{ justifyContent: 'center', marginBottom: '12px' }}>
-              <h2 style={{ fontSize: '15px', color: 'var(--text-muted)', fontWeight: '500' }}>นัดหมายล่วงหน้า</h2>
+          <div className="schedule-section" style={{ marginTop: '32px', marginBottom: '24px' }}>
+            <div className="card-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
+              <h2 style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>นัดหมายล่วงหน้า</h2>
             </div>
-            <div className="schedule-list" style={{ 
-              background: '#FFFFFF', 
-              borderRadius: '12px',
-              border: '1px solid var(--surface-border)',
-              overflow: 'hidden'
-            }}>
+            <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {data.upcomingSchedules.map((item, idx) => {
                  const date = new Date(item.datetime_iso);
                  const formatted = date.toLocaleString('th-TH', { month: 'short', day: 'numeric' });
                  return (
                    <div key={`up-${idx}`} style={{ 
-                     display: 'flex', justifyContent: 'space-between', padding: '14px 16px', 
-                     borderBottom: idx === data.upcomingSchedules.length - 1 ? 'none' : '1px solid var(--surface-border)', 
+                     display: 'flex', justifyContent: 'space-between', padding: '12px 16px', 
+                     background: '#F2F2F7',
+                     borderRadius: '14px',
                      fontSize: '14px',
-                     alignItems: 'center'
+                     alignItems: 'center',
+                     border: '1px solid rgba(0,0,0,0.02)'
                    }}>
-                     <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                       <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#C7C7CC' }} />
+                     <div style={{ color: '#666666', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '500' }}>
+                       <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1D1D6' }} />
                        {item.title}
                      </div>
-                     <div style={{ color: 'var(--text-muted)', fontSize: '13px' }}>{formatted}</div>
+                     <div style={{ color: '#8E8E93', fontSize: '13px', fontWeight: '600' }}>{formatted}</div>
                    </div>
                  );
               })}
