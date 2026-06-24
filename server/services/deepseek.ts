@@ -50,8 +50,8 @@ export async function classifyIntent(
       content: `You are an intent classifier for a Thai LINE chatbot. Classify the user's message into ONE of these intents:
 
 - horoscope: User asks about fortune, luck, horoscope, ดวง, โชคชะตา
-- schedule_create: User wants to create/set a reminder, meeting, appointment, นัด, ตาราง
-- schedule_list: User wants to see their schedule/agenda
+- schedule_create: User wants to create/set a reminder, meeting, appointment, นัด, ตาราง, เตือน, ต้องทำ, ให้จำว่า, จำไว้ว่า
+- schedule_list: User wants to see their schedule/agenda, ขอดูตาราง, วันนี้มีนัดอะไรบ้าง, วันนี้มีทำอะไรบ้าง
 - expense_log: User mentions spending money, paying, buying (จ่าย, ซื้อ, บาท)
 - expense_summary: User wants expense report/summary
 - nutrition_log: User mentions eating food, drinking, meals (กิน, ทาน, อาหาร)

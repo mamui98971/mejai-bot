@@ -79,6 +79,10 @@ export interface DashboardData {
     dailyProtein: number;
     dailySodium: number;
   };
+  upcomingSchedules: {
+    title: string;
+    datetime_iso: string;
+  }[];
 }
 
 export async function updateSettings(userProfile: UserProfileInput, aiPersona: AiPersonaInput) {

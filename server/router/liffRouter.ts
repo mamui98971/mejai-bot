@@ -83,6 +83,7 @@ liffRouter.get('/me', async (req, res) => {
     let dailyCalories = 0;
     let dailyProtein = 0;
     let dailySodium = 0;
+    const upcomingSchedules: { title: string; datetime_iso: string }[] = [];
 
     if (logs) {
       logs.forEach(log => {
@@ -96,9 +97,20 @@ liffRouter.get('/me', async (req, res) => {
           dailyCalories += log.payload.calories || 0;
           dailyProtein += log.payload.protein || 0;
           dailySodium += log.payload.sodium || 0;
+        } else if (log.log_type === 'schedule') {
+          const payload = log.payload as any;
+          const eventDate = new Date(payload.datetime_iso);
+          if (eventDate >= today) {
+            upcomingSchedules.push({
+              title: payload.title,
+              datetime_iso: payload.datetime_iso
+            });
+          }
         }
       });
     }
+    
+    upcomingSchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
 
     res.json({
       user: {
@@ -127,7 +139,8 @@ liffRouter.get('/me', async (req, res) => {
         dailyCalories,
         dailyProtein,
         dailySodium
-      }
+      },
+      upcomingSchedules: upcomingSchedules.slice(0, 5) // Return up to 5 upcoming items
     });
 
   } catch (err) {
