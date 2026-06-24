@@ -79,9 +79,17 @@ export interface DashboardData {
     dailyProtein: number;
     dailySodium: number;
   };
-  upcomingSchedules: {
+  todaySchedules: {
+    id: string;
     title: string;
     datetime_iso: string;
+    is_done: boolean;
+  }[];
+  upcomingSchedules: {
+    id: string;
+    title: string;
+    datetime_iso: string;
+    is_done: boolean;
   }[];
 }
 
@@ -89,5 +97,12 @@ export async function updateSettings(userProfile: UserProfileInput, aiPersona: A
   return fetchWithLiffAuth('/api/liff/settings', {
     method: 'PUT',
     body: JSON.stringify({ userProfile, aiPersona }),
+  });
+}
+
+export async function toggleScheduleDone(id: string, currentPayload: any, is_done: boolean) {
+  return fetchWithLiffAuth(`/api/liff/schedule/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ is_done, payload: currentPayload }),
   });
 }

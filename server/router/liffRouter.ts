@@ -76,14 +76,15 @@ liffRouter.get('/me', async (req, res) => {
       .from('user_data_logs')
       .select('*')
       .eq('user_id', user.id)
-      .gte('logged_at', startOfMonth.toISOString());
+      .or(`logged_at.gte.${startOfMonth.toISOString()},log_type.eq.schedule`);
 
     let dailyExpense = 0;
     let monthlyExpense = 0;
     let dailyCalories = 0;
     let dailyProtein = 0;
     let dailySodium = 0;
-    const upcomingSchedules: { title: string; datetime_iso: string }[] = [];
+    const todaySchedules: { id: string; title: string; datetime_iso: string; is_done: boolean }[] = [];
+    const upcomingSchedules: { id: string; title: string; datetime_iso: string; is_done: boolean }[] = [];
 
     if (logs) {
       logs.forEach(log => {
@@ -100,16 +101,28 @@ liffRouter.get('/me', async (req, res) => {
         } else if (log.log_type === 'schedule') {
           const payload = log.payload as any;
           const eventDate = new Date(payload.datetime_iso);
-          if (eventDate >= today) {
-            upcomingSchedules.push({
-              title: payload.title,
-              datetime_iso: payload.datetime_iso
-            });
+          const isDone = !!payload.is_done;
+          
+          const scheduleObj = {
+            id: log.id,
+            title: payload.title,
+            datetime_iso: payload.datetime_iso,
+            is_done: isDone
+          };
+
+          const eventDateString = eventDate.toDateString();
+          const todayString = today.toDateString();
+
+          if (eventDateString === todayString) {
+            todaySchedules.push(scheduleObj);
+          } else if (eventDate > today) {
+            upcomingSchedules.push(scheduleObj);
           }
         }
       });
     }
     
+    todaySchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
     upcomingSchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
 
     res.json({
@@ -140,11 +153,34 @@ liffRouter.get('/me', async (req, res) => {
         dailyProtein,
         dailySodium
       },
+      todaySchedules,
       upcomingSchedules: upcomingSchedules.slice(0, 5) // Return up to 5 upcoming items
     });
 
   } catch (err) {
     console.error('LIFF /me error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+// PATCH /api/liff/schedule/:id - Toggle is_done
+liffRouter.patch('/schedule/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_done, payload } = req.body;
+    
+    const updatedPayload = { ...payload, is_done };
+
+    const { error } = await supabase
+      .from('user_data_logs')
+      .update({ payload: updatedPayload })
+      .eq('id', id);
+
+    if (error) throw error;
+
+    res.json({ success: true, is_done });
+  } catch (err) {
+    console.error('LIFF /schedule/:id error:', err);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
