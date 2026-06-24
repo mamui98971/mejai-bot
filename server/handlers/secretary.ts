@@ -165,24 +165,105 @@ export async function handleScheduleList(
 
 /**
  * Handle schedule done intent
- * Uses AI to respond in character and instruct user to use the dashboard
+ * Uses AI to match the user's message with a pending schedule and marks it as done.
  */
+import supabase from '../services/supabase';
+
 export async function handleScheduleDone(
   message: string,
   ctx: MejaiContext
 ): Promise<HandlerResult> {
   await saveConversationTurn(ctx.user.id, ConversationRole.USER, message);
 
-  const prompt = [
-    {
-      role: 'system' as const,
-      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้บอกว่าทำบางอย่างเสร็จแล้ว หรือบอกว่างานเสร็จแล้ว ให้ตอบรับตามคาแรคเตอร์ และบอกผู้ใช้เนียนๆ ว่า "ถ้าเป็นนัดหมายหรือตารางงานที่ตั้งไว้ในระบบ ให้ไปกดทำเครื่องหมายว่าเสร็จสิ้นผ่านหน้าแดชบอร์ดด้วยนะ" (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
-    },
-    { role: 'user' as const, content: message },
-  ];
+  try {
+    // 1. Fetch pending schedules
+    const { data: logs } = await supabase
+      .from('user_data_logs')
+      .select('id, payload')
+      .eq('user_id', ctx.user.id)
+      .eq('log_type', LogType.SCHEDULE);
 
-  const reply = await chat(prompt, { temperature: 0.8, max_tokens: 200 });
-  await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, reply);
+    const pendingSchedules = (logs || []).filter(
+      (log) => !(log.payload as any).is_done
+    );
 
-  return { reply_text: reply };
+    if (pendingSchedules.length === 0) {
+      const promptEmpty = [
+        {
+          role: 'system' as const,
+          content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้บอกว่าทำงานเสร็จแล้ว แต่ในระบบไม่มีตารางงานค้างอยู่เลย ให้ชื่นชมและบอกว่าในระบบไม่มีงานค้างนะ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+        },
+        { role: 'user' as const, content: message },
+      ];
+      const reply = await chat(promptEmpty, { temperature: 0.8, max_tokens: 200 });
+      await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, reply);
+      return { reply_text: reply };
+    }
+
+    // 2. Map for AI
+    const scheduleListStr = pendingSchedules
+      .map((log) => `ID: ${log.id} | Title: ${(log.payload as any).title}`)
+      .join('\n');
+
+    // 3. Ask AI to match
+    const matchPrompt = [
+      {
+        role: 'system' as const,
+        content: `You are an AI assistant helping to mark schedules as done.
+The user said they finished a task.
+Here are their pending tasks:
+${scheduleListStr}
+
+Which task ID best matches their message?
+Reply ONLY in JSON format:
+{
+  "matched_id": "<ID or null if no match>"
+}`
+      },
+      { role: 'user' as const, content: message }
+    ];
+
+    const matchRaw = await chat(matchPrompt, { temperature: 0.1, response_format: { type: 'json_object' } });
+    const matchRes = JSON.parse(matchRaw);
+
+    if (matchRes.matched_id) {
+      // Find the matched log to update
+      const matchedLog = pendingSchedules.find((l) => l.id === matchRes.matched_id);
+      if (matchedLog) {
+        const updatedPayload = { ...(matchedLog.payload as any), is_done: true };
+        
+        await supabase
+          .from('user_data_logs')
+          .update({ payload: updatedPayload })
+          .eq('id', matchedLog.id);
+
+        const promptSuccess = [
+          {
+            role: 'system' as const,
+            content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้บอกว่าทำ "${updatedPayload.title}" เสร็จแล้ว คุณได้ทำการติ๊กเครื่องหมายถูก (Mark as done) ในระบบให้เรียบร้อยแล้ว ให้ชื่นชมและบอกให้ผู้ใช้รับรู้ว่าคุณจัดการติ๊กในระบบให้แล้ว (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+          },
+          { role: 'user' as const, content: message },
+        ];
+        const reply = await chat(promptSuccess, { temperature: 0.8, max_tokens: 200 });
+        await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, reply);
+        return { reply_text: reply };
+      }
+    }
+
+    // No match found
+    const promptNoMatch = [
+      {
+        role: 'system' as const,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้บอกว่าทำบางอย่างเสร็จแล้ว แต่คุณหาไม่เจอว่าตรงกับงานไหนในระบบ ให้ตอบรับตามคาแรคเตอร์ ชื่นชมที่ทำเสร็จ และบอกเนียนๆ ว่าถ้าเป็นงานในระบบให้ไปกดติ๊กเองในแดชบอร์ดนะเพราะหาไม่เจอ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+      },
+      { role: 'user' as const, content: message },
+    ];
+    const reply = await chat(promptNoMatch, { temperature: 0.8, max_tokens: 200 });
+    await saveConversationTurn(ctx.user.id, ConversationRole.ASSISTANT, reply);
+    return { reply_text: reply };
+
+  } catch (error) {
+    console.error('❌ Schedule done failed:', error);
+    return { reply_text: 'ระบบตารางงานมีปัญหาขัดข้องชั่วคราวครับ โปรดลองใหม่' };
+  }
 }
