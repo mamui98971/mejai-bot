@@ -132,7 +132,7 @@ liffRouter.get('/me', async (req, res) => {
     
     todaySchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
     upcomingSchedules.sort((a, b) => new Date(a.datetime_iso).getTime() - new Date(b.datetime_iso).getTime());
-    const limitedUpcoming = upcomingSchedules.slice(0, 5);
+    const limitedUpcoming = upcomingSchedules.slice(0, 50);
 
     res.json({
       user: {
