@@ -33,6 +33,7 @@ You must output STRICTLY in JSON format with two keys: "summary" (string) and "t
   - "kink_level": Openness to taboo/extreme themes (e.g., Vanilla, Curious, Hardcore, Sadomasochistic)
   - "attachment_style": How they relate to the AI (e.g., Needy, Aloof, Protective, Possessive)
   - "conversation_style": (e.g., Brief, Descriptive, Demanding, Poetic)
+  - "custom_path": Evaluate the current relationship dynamic based on the user's behavior. Choose EXACTLY ONE from: 'romantic', 'toxic', 'master_slave', 'sugar', 'yandere', 'motherly', 'partners_in_crime', 'brother', 'sister'. Default to 'romantic' if unsure.
 
 EXISTING MEMORY SUMMARY:
 ${currentSummary || 'None'}

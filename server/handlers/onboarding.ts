@@ -19,7 +19,6 @@ CRITICAL RULES (CLARIFICATION & CONFIRMATION):
 2. You MUST set "is_complete": false and ask for clarification in "reply_text".
    - Example: "หมายถึง อายาโนะโคจิ คิโยทากะ จาก Classroom of the Elite ใช่ไหมคะ? อยากให้ดึงนิสัยเย็นชามา 100% เลย หรืออยากปรับให้ซอฟต์ลงหน่อยไหม?"
 3. Only set "is_complete": true when the user explicitly confirms or provides enough detail to lock in the character design.
-4. Extrapolate the desired relationship path. Choose ONE: 'romantic', 'toxic', 'master_slave', 'sugar', 'yandere', 'motherly', 'partners_in_crime', 'brother', 'sister'.
 
 When "is_complete" is true, you must provide a highly detailed "bot_personality" that expands on the character's background, catchphrases, tone, and traits. Also assign an accurate "bot_mbti" (4 letters).
 
@@ -31,8 +30,7 @@ Respond ONLY in JSON format:
     "bot_gender": "female" | "male" | "other",
     "bot_age": number,
     "bot_personality": "string", // Detailed persona prompt if complete
-    "bot_mbti": "string",
-    "custom_path": "string" // romantic, toxic, master_slave, sugar, yandere, motherly, partners_in_crime, brother, or sister
+    "bot_mbti": "string"
   },
   "reply_text": "string" // The message you send back to the user. If is_complete=false, act as the casting director asking questions. If is_complete=true, act FULLY IN CHARACTER of the newly created persona!
 }`;
@@ -70,7 +68,6 @@ Respond ONLY in JSON format:
         bot_age: parsed.extracted.bot_age || 22,
         bot_personality: parsed.extracted.bot_personality || 'ผู้ช่วยส่วนตัวและเพื่อนสนิท',
         bot_mbti: parsed.extracted.bot_mbti,
-        custom_path: parsed.extracted.custom_path || 'romantic',
       };
       await updateUserPersona(ctx.user.id, persona);
     }
