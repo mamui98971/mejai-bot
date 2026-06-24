@@ -32,7 +32,7 @@ export async function handleStatusCheck(
     [RelationshipStatus.SOULMATE]: 'คนรู้ใจ',
   };
 
-  const statusHint = `บอกผู้ใช้ว่าตอนนี้ระดับความสัมพันธ์คือ "${statusMap[status]}" (คะแนนความสนิท: ${score}/100) พูดอธิบายความรู้สึกที่มีต่อผู้ใช้ในระดับนี้อย่างน่ารัก`;
+  const statusHint = `บอกผู้ใช้ว่าตอนนี้ระดับความสัมพันธ์คือ "${statusMap[status]}" (คะแนนความสนิท: ${score}/100) พูดอธิบายความรู้สึกที่มีต่อผู้ใช้ในระดับนี้ตามคาแรคเตอร์ของคุณ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
 
   const replyPrompt = [
     {

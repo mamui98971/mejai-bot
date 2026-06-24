@@ -89,7 +89,7 @@ Rules:
     } else if (extracted.is_eating_it === null) {
       // Ambiguous if they ate it or not
       contextHint = `บันทึกรายจ่ายเรียบร้อยแล้ว: ${extracted.expense.amount} บาท (ซื้อ ${extracted.diet.food_name})\n`;
-      contextHint += `เนื่องจากผู้ใช้บอกแค่ว่า "ซื้อ" แต่ไม่ได้บอกว่า "กิน" ให้ถามผู้ใช้ตามคาแรคเตอร์ของคุณว่า "อันนี้กินเองรึเปล่า จะได้บันทึกแคลอรี่ให้ด้วยเลย?" (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
+      contextHint += `เนื่องจากผู้ใช้บอกแค่ว่า "ซื้อ" แต่ไม่ได้บอกว่า "กิน" ให้ถามผู้ใช้ตามคาแรคเตอร์ของคุณว่า อันนี้ซื้อมากินเองหรือเปล่า จะได้บันทึกแคลอรี่ให้ถูก (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
     } else {
       // Save the diet log too
       await insertDataLog(ctx.user.id, LogType.DIET, extracted.diet as any);
@@ -106,7 +106,7 @@ Rules:
 พูดคุยให้กำลังใจตามเป้าหมายของเขาอย่างเป็นธรรมชาติ โดยรวบยอดทั้งเรื่องเงินและเรื่องอาหารไว้ด้วยกัน`;
 
       if (extracted.diet.sodium > HEALTH.SODIUM_DAILY_CAP_MG) {
-        contextHint += `\n⚠️ WATER_RETENTION_ALERT: แค่มื้อนี้ก็โซเดียมเกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! เตือนผู้ใช้เรื่องบวมน้ำอย่างน่ารัก`;
+        contextHint += `\n⚠️ WATER_RETENTION_ALERT: แค่มื้อนี้ก็โซเดียมเกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! เตือนผู้ใช้เรื่องบวมน้ำตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
       }
     }
 

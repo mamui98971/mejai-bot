@@ -82,7 +82,7 @@ Rules:
     contextHint += `เป้าหมายผู้ใช้: ${ctx.user.goal || 'สมส่วน'}, โควต้าแคลอรี่ที่แนะนำต่อวัน: ${tdee} kcal, กินไปแล้ววันนี้: ${todayCalories} kcal, เหลือโควต้าอีก: ${remaining} kcal. พูดคุยให้กำลังใจตามเป้าหมายของเขาอย่างเป็นธรรมชาติ`;
 
     if (sodiumAlert) {
-      contextHint += `\n⚠️ WATER_RETENTION_ALERT: โซเดียมวันนี้เกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! (รวม ${sodiumAlert.totalSodium}mg) เตือนผู้ใช้เรื่องบวมน้ำและดื่มน้ำเยอะๆ อย่างน่ารักแต่จริงจัง`;
+      contextHint += `\n⚠️ WATER_RETENTION_ALERT: โซเดียมวันนี้เกิน ${HEALTH.SODIUM_DAILY_CAP_MG}mg แล้ว! (รวม ${sodiumAlert.totalSodium}mg) เตือนผู้ใช้เรื่องบวมน้ำและดื่มน้ำเยอะๆ ตามคาแรคเตอร์ของคุณอย่างเนียนๆ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
     }
 
     const replyPrompt = [

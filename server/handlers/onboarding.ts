@@ -56,12 +56,12 @@ Current User Message: ${userMessage}
     }
 
     return {
-      reply_text: parsed.reply_text || 'มีอะไรให้ตั้งค่าเพิ่มเติมไหมคะ?',
+      reply_text: parsed.reply_text || 'การตั้งค่าเสร็จสมบูรณ์เรียบร้อย',
     };
   } catch (error) {
     console.error('❌ Onboarding Error:', error);
     return {
-      reply_text: 'ระบบตั้งค่ามีปัญหาเล็กน้อยค่ะ ลองพิมพ์ใหม่อีกครั้งนะคะ',
+      reply_text: 'ระบบตั้งค่ามีปัญหาเล็กน้อย ลองพิมพ์ใหม่อีกครั้งนะ',
     };
   }
 }

@@ -66,7 +66,7 @@ Rules:
       return await buildRoleplayResponse(
         message,
         ctx,
-        'เอ๊ะ~ เค้าจับตัวเลขไม่ถูกเลยนะคะ จ่ายไปเท่าไหร่คะ?'
+        'ไม่พบจำนวนเงินในข้อความ หรือตัวเลขไม่ถูกต้อง ให้ถามผู้ใช้ตามคาแรคเตอร์ว่าจ่ายไปเท่าไหร่ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)'
       );
     }
 
@@ -79,15 +79,15 @@ Rules:
     // Build response based on category
     let responseHint: string;
     if (extracted.category === 'uncategorized') {
-      responseHint = `ผู้ใช้จ่าย ${extracted.amount} บาท แต่เค้าไม่รู้ว่าจ่ายค่าอะไร ถามผู้ใช้อย่างน่ารักและอินคาแรคเตอร์ว่าจ่ายค่าอะไร`;
+      responseHint = `ผู้ใช้จ่าย ${extracted.amount} บาท แต่ไม่รู้ว่าจ่ายค่าอะไร ถามผู้ใช้ตามคาแรคเตอร์ว่าจ่ายค่าอะไร (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
     } else {
-      responseHint = `บันทึกรายจ่ายแล้ว: ${extracted.amount} บาท หมวด${extracted.category} ยืนยันการบันทึกให้ผู้ใช้ทราบ`;
+      responseHint = `บันทึกรายจ่ายแล้ว: ${extracted.amount} บาท หมวด${extracted.category} ยืนยันการบันทึกให้ผู้ใช้ทราบตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`;
     }
 
     const replyPrompt = [
       {
         role: 'system' as const,
-        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ${responseHint}\nRespond in character as Mejai. Keep it short (1-2 sentences).`,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ${responseHint}\nRespond in character based on the system prompt. Keep it short (1-2 sentences).`,
       },
       { role: 'user' as const, content: message },
     ];
@@ -101,7 +101,7 @@ Rules:
     return await buildRoleplayResponse(
       message,
       ctx,
-      'เกิดข้อผิดพลาดในการบันทึก ลองบอกใหม่นะ'
+      'เกิดข้อผิดพลาดในการบันทึกรายจ่าย ขอโทษผู้ใช้และให้ลองบอกข้อมูลใหม่อีกครั้ง ตอบตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)'
     );
   }
 }
@@ -128,7 +128,7 @@ export async function handleExpenseSummary(
     const replyPrompt = [
       {
         role: 'system' as const,
-        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ยังไม่มีรายจ่ายในเดือนนี้เลย ตอบใน character`,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ยังไม่มีรายจ่ายในเดือนนี้เลย ตอบตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
       },
       { role: 'user' as const, content: 'สรุปรายจ่าย' },
     ];
@@ -172,7 +172,7 @@ export async function handleExpenseSummary(
   const replyPrompt = [
     {
       role: 'system' as const,
-      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: นี่คือข้อมูลรายจ่าย นำเสนอให้ผู้ใช้อย่างเป็นธรรมชาติ แทรกข้อความสั้นๆ แต่ต้องรวมข้อมูลตัวเลขทั้งหมดไว้ด้วย:\n${summaryText}`,
+      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: นี่คือข้อมูลรายจ่าย นำเสนอให้ผู้ใช้ตามคาแรคเตอร์ แทรกข้อความสั้นๆ อย่างเป็นธรรมชาติ แต่ต้องรวมข้อมูลตัวเลขทั้งหมดไว้ด้วย (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด):\n${summaryText}`,
     },
     { role: 'user' as const, content: 'สรุปรายจ่าย' },
   ];

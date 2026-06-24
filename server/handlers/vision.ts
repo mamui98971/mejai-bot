@@ -108,7 +108,7 @@ Respond ONLY in JSON format:
       const replyPrompt = [
         {
           role: 'system' as const,
-          content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ส่งรูปมาให้แต่เค้าดูไม่ออกว่าเป็นใบเสร็จหรือของกิน ถามผู้ใช้อย่างน่ารักว่ามันคืออะไร`,
+          content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ส่งรูปมาให้แต่คุณดูไม่ออกว่าเป็นใบเสร็จหรือของกิน ถามผู้ใช้ตามคาแรคเตอร์ว่ามันคืออะไร (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
         },
         { role: 'user' as const, content: 'นี่รูปอะไร' },
       ];
@@ -117,6 +117,14 @@ Respond ONLY in JSON format:
     }
   } catch (error) {
     console.error('❌ Vision processing failed:', error);
-    return { reply_text: 'งื้ออออ เค้าดูรูปนี้ไม่ชัดเลยอะค่ะ ลองส่งมาใหม่ได้ไหมคะ? 🥺' };
+    const fallbackPrompt = [
+      {
+        role: 'system' as const,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: เกิดข้อผิดพลาดในการดูรูปภาพ ขอโทษผู้ใช้และบอกให้ลองส่งมาใหม่ ตอบตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+      },
+      { role: 'user' as const, content: 'นี่รูปอะไร' },
+    ];
+    const fallbackReply = await chat(fallbackPrompt, { temperature: 0.8, max_tokens: 200 });
+    return { reply_text: fallbackReply };
   }
 }

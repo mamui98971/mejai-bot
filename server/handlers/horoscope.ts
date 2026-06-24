@@ -16,7 +16,7 @@ export async function handleHoroscope(
   let contextHint = '';
 
   if (!birthdate) {
-    contextHint = 'ผู้ใช้ขอให้ดูดวง แต่เรายังไม่รู้วันเกิด ถามวันเกิดผู้ใช้อย่างน่ารัก (รูปแบบ เช่น 15 ตุลาคม 2540)';
+    contextHint = 'ผู้ใช้ขอให้ดูดวง แต่เรายังไม่รู้วันเกิด ถามวันเกิดผู้ใช้ตามคาแรคเตอร์ (รูปแบบ เช่น 15 ตุลาคม 2540) (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)';
   } else {
     contextHint = `สร้างคำทำนายดวงชะตารายวันสำหรับคนที่เกิดวันที่ ${birthdate} 
     สิ่งที่ต้องมี:
@@ -41,6 +41,14 @@ export async function handleHoroscope(
     return { reply_text: reply };
   } catch (error) {
     console.error('❌ Horoscope generation failed:', error);
-    return { reply_text: 'แงงงงงง ตอนนี้พลังเวทย์เค้าหมด ดูดวงไม่ได้เลย รอก่อนน้าาา~' };
+    const fallbackPrompt = [
+      {
+        role: 'system' as const,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: เกิดข้อผิดพลาดในการดูดวง ขอโทษผู้ใช้ตามคาแรคเตอร์ (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
+      },
+      { role: 'user' as const, content: message },
+    ];
+    const fallbackReply = await chat(fallbackPrompt, { temperature: 0.8, max_tokens: 200 });
+    return { reply_text: fallbackReply };
   }
 }

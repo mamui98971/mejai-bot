@@ -123,7 +123,7 @@ export async function handleScheduleList(
     const replyPrompt = [
       {
         role: 'system' as const,
-        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ไม่มีนัดหมายที่กำลังจะถึง ตอบใน character และถามว่าอยากให้เค้าช่วยจัดตารางไหม`,
+        content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: ผู้ใช้ไม่มีนัดหมายที่กำลังจะถึง ตอบตามคาแรคเตอร์ และเสนอตัวว่าอยากให้ช่วยจัดตารางให้ไหม (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด)`,
       },
       { role: 'user' as const, content: 'ตารางงาน' },
     ];
@@ -154,7 +154,7 @@ export async function handleScheduleList(
   const replyPrompt = [
     {
       role: 'system' as const,
-      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: นี่คือตารางงาน นำเสนอให้ผู้ใช้อย่างเป็นธรรมชาติ แทรกข้อความสั้นๆ แต่รวมข้อมูลทั้งหมดไว้ด้วย:\n${scheduleText}`,
+      content: `${buildSystemPrompt(ctx)}\n\nCONTEXT: นี่คือตารางงาน นำเสนอให้ผู้ใช้ตามคาแรคเตอร์ แทรกข้อความสั้นๆ อย่างเป็นธรรมชาติ แต่รวมข้อมูลทั้งหมดไว้ด้วย (ห้ามหลุดคาร์แรคเตอร์เด็ดขาด):\n${scheduleText}`,
     },
     { role: 'user' as const, content: 'ตารางงาน' },
   ];
