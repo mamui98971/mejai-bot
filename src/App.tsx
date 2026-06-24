@@ -15,6 +15,7 @@ function App() {
   const [view, setView] = useState<ViewState>('loading');
   const [data, setData] = useState<DashboardData | null>(null);
   const [selectedTier, setSelectedTier] = useState<'standard' | 'premium'>('premium');
+  const [errorDetails, setErrorDetails] = useState<string>('');
 
   useEffect(() => {
     async function init() {
@@ -42,8 +43,9 @@ function App() {
         } else {
           setView('dashboard');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Initialization failed completely', err);
+        setErrorDetails(err?.message || String(err));
         setView('error');
       }
     }
@@ -61,8 +63,10 @@ function App() {
 
   if (view === 'error') {
     return (
-      <div className="loader-container">
-        <p className="warning-text">LIFF is not configured or the online API is unreachable.</p>
+      <div className="loader-container" style={{ padding: '20px', textAlign: 'center' }}>
+        <p className="warning-text" style={{ wordBreak: 'break-word', color: '#FF3B30', fontSize: '14px', marginBottom: '16px' }}>
+          {errorDetails || 'LIFF is not configured or the online API is unreachable.'}
+        </p>
         <button 
           onClick={() => {
             liff.logout();
