@@ -11,7 +11,7 @@ import { resolveEventContext } from './middleware/userResolver';
 import { routeIntent, isTextEvent, getEventText } from './router/intentRouter';
 import { handleRoleplay } from './handlers/roleplay';
 import { handleExpenseLog, handleExpenseSummary } from './handlers/expense';
-import { handleScheduleCreate, handleScheduleList, handleScheduleDone } from './handlers/secretary';
+import { handleScheduleCreate, handleScheduleList } from './handlers/secretary';
 import { handleNutritionLog, handleNutritionSummary } from './handlers/nutrition';
 import { handleHoroscope } from './handlers/horoscope';
 import { handleStatusCheck, processAffinityUpdate } from './handlers/relationship';
@@ -24,7 +24,7 @@ import { incrementMessageCount, resetUserPersona } from './services/supabase';
 import { handlePaymentWebhook } from './services/omise';
 import { Intent } from './types';
 import { UPSELL_MESSAGES } from './config/constants';
-import { startScheduleNotifier } from './cron/scheduleNotifier';
+import { checkAndSendReminders } from './cron/scheduleNotifier.js';
 import { resetDailyLimits } from './cron/resetDailyLimits';
 
 const app = express();
@@ -73,7 +73,7 @@ app.get('/api/cron/notify', async (req, res) => {
 
   try {
     // We import checkAndNotifySchedules dynamically to avoid running interval in serverless
-    const { checkAndNotifySchedules } = await import('./cron/scheduleNotifier');
+    const { checkAndNotifySchedules } = await import('./cron/scheduleNotifier.js');
     await checkAndNotifySchedules();
     res.status(200).json({ status: 'success', message: 'Cron job executed' });
   } catch (error) {
@@ -180,7 +180,7 @@ app.post(
               reply = (await handleScheduleList(ctx)).reply_text;
               break;
             case Intent.SCHEDULE_DONE:
-              reply = (await handleScheduleDone(text, ctx)).reply_text;
+              reply = "การทำเครื่องหมายว่าเสร็จแล้ว ทำได้ผ่านปุ่มในแดชบอร์ดนะคะ";
               break;
 
             // Phase 4 handlers
