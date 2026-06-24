@@ -1,6 +1,6 @@
 import liff from '@line/liff';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mejai-bot.vercel.app';
 
 async function fetchWithLiffAuth(endpoint: string, options: RequestInit = {}) {
   const idToken = liff.getIDToken();
