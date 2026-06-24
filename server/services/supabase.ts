@@ -260,7 +260,7 @@ export async function updateAffinityScore(
  */
 export async function updateUserPersona(
   userId: string,
-  persona: { bot_name: string; bot_gender: string; bot_age: number; bot_personality: string }
+  persona: { bot_name: string; bot_gender: string; bot_age: number; bot_personality: string; bot_mbti?: string }
 ): Promise<UserRelationship> {
   const { data, error } = await supabase
     .from('user_relationships')
@@ -269,6 +269,7 @@ export async function updateUserPersona(
       bot_gender: persona.bot_gender,
       bot_age: persona.bot_age,
       bot_personality: persona.bot_personality,
+      bot_mbti: persona.bot_mbti,
       is_onboarded: true,
     })
     .eq('user_id', userId)
@@ -299,6 +300,7 @@ export async function updateUserSettings(
       weight: userProfile.weight,
       height: userProfile.height,
       goal: userProfile.goal,
+      mbti: userProfile.mbti,
       monthly_budget: userProfile.monthly_budget,
     })
     .eq('id', userId)

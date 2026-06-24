@@ -17,18 +17,20 @@ The user's current profile:
 Weight: ${ctx.user.weight || 'unknown'} kg
 Height: ${ctx.user.height || 'unknown'} cm
 Goal: ${ctx.user.goal || 'unknown'} (options: ผอม, สมส่วน, อ้วน)
+MBTI: ${ctx.user.mbti || 'unknown'}
 
-Extract any updated metrics from the user's message.
-Respond ONLY with a JSON object containing the keys 'weight' (number or null), 'height' (number or null), and 'goal' ("ผอม" | "สมส่วน" | "อ้วน" | null).
+Extract any updated metrics or personality types from the user's message.
+Respond ONLY with a JSON object containing the keys 'weight' (number or null), 'height' (number or null), 'goal' ("ผอม" | "สมส่วน" | "อ้วน" | null), and 'mbti' (string or null).
 If a metric is not mentioned, return null for that key.
-Do not convert units unless obviously necessary. Assume kg and cm.`;
+Do not convert units unless obviously necessary. Assume kg and cm.
+For MBTI, it must be exactly 4 letters (e.g. INTJ, ENFP).`;
 
   const messages: DeepSeekMessage[] = [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: text },
   ];
 
-  let extracted: { weight: number | null; height: number | null; goal: string | null } = { weight: null, height: null, goal: null };
+  let extracted: { weight: number | null; height: number | null; goal: string | null; mbti: string | null } = { weight: null, height: null, goal: null, mbti: null };
 
   try {
     const response = await chat(messages, {
@@ -41,13 +43,14 @@ Do not convert units unless obviously necessary. Assume kg and cm.`;
     console.error('Failed to extract profile data:', err);
   }
 
-  const hasUpdates = extracted.weight !== null || extracted.height !== null || extracted.goal !== null;
+  const hasUpdates = extracted.weight !== null || extracted.height !== null || extracted.goal !== null || extracted.mbti !== null;
 
   if (hasUpdates) {
     const updatedUser = {
       weight: extracted.weight ?? ctx.user.weight,
       height: extracted.height ?? ctx.user.height,
       goal: (extracted.goal as any) ?? ctx.user.goal,
+      mbti: extracted.mbti ?? ctx.user.mbti,
     };
 
     try {
@@ -59,6 +62,7 @@ Updates made:
 ${extracted.weight ? `- Weight updated to ${extracted.weight} kg` : ''}
 ${extracted.height ? `- Height updated to ${extracted.height} cm` : ''}
 ${extracted.goal ? `- Goal updated to ${extracted.goal}` : ''}
+${extracted.mbti ? `- MBTI updated to ${extracted.mbti}` : ''}
 Respond naturally to the user acknowledging this update and giving them encouragement or a playful remark depending on your persona. Do not talk like a robot.`;
 
       const history = await getConversationHistory(ctx.user.id, ctx.tier_config.context_turns);

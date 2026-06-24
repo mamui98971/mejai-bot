@@ -70,6 +70,7 @@ export interface User {
   weight?: number;
   height?: number;
   goal?: 'ผอม' | 'สมส่วน' | 'อ้วน';
+  mbti?: string;
   monthly_budget?: number;
   created_at: string;
   updated_at: string;
@@ -88,6 +89,7 @@ export interface UserRelationship {
   bot_gender: string;
   bot_age: number;
   bot_personality: string;
+  bot_mbti?: string;
   is_onboarded: boolean;
   memory_summary: string;
 }
