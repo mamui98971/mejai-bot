@@ -1,4 +1,5 @@
-import { Wallet, CheckCircle2, Circle } from 'lucide-react';
+import { Wallet, CheckCircle2, Circle, MessageCircle } from 'lucide-react';
+import liff from '@line/liff';
 import { toggleScheduleDone } from '../api/client';
 import type { DashboardData } from '../api/client';
 import { ProgressBar } from './ProgressBar';
@@ -168,6 +169,27 @@ export function Dashboard({ data }: DashboardProps) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Floating Back to Chat Button */}
+      <div 
+        onClick={() => liff.closeWindow()}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          background: 'var(--primary)',
+          color: '#FFF',
+          padding: '16px',
+          borderRadius: '50%',
+          boxShadow: '0 8px 24px rgba(10, 132, 255, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          zIndex: 100
+        }}>
+        <MessageCircle size={28} />
       </div>
     </div>
   );
