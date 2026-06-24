@@ -142,57 +142,108 @@ export function Dashboard({ data }: DashboardProps) {
           )}
         </div>
 
-        {data.upcomingSchedules && data.upcomingSchedules.length > 0 && (() => {
-          const upcomingToShow = showAllUpcoming 
-            ? data.upcomingSchedules 
-            : data.upcomingSchedules.slice(0, 3);
-            
-          return (
-            <div className="schedule-section" style={{ marginTop: '32px', marginBottom: '24px' }}>
-              <div className="card-header" style={{ justifyContent: 'center', marginBottom: '16px' }}>
-                <h2 style={{ fontSize: '14px', color: 'var(--text-muted)', fontWeight: '600', letterSpacing: '0.5px', textTransform: 'uppercase' }}>นัดหมายล่วงหน้า</h2>
-              </div>
-              <div className="schedule-list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {upcomingToShow.map((item, idx) => {
-                   const date = new Date(item.datetime_iso);
-                   const formatted = date.toLocaleString('th-TH', { month: 'short', day: 'numeric' });
-                   return (
-                     <div key={`up-${idx}`} style={{ 
-                       display: 'flex', justifyContent: 'space-between', padding: '12px 16px', 
-                       background: '#F2F2F7',
-                       borderRadius: '14px',
-                       fontSize: '14px',
-                       alignItems: 'center',
-                       border: '1px solid rgba(0,0,0,0.02)'
-                     }}>
-                       <div style={{ color: '#666666', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: '500' }}>
-                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1D1D6' }} />
-                         {item.title}
-                       </div>
-                       <div style={{ color: '#8E8E93', fontSize: '13px', fontWeight: '600' }}>{formatted}</div>
-                     </div>
-                   );
-                })}
-              </div>
-              {data.upcomingSchedules.length > 3 && (
-                <div 
-                  onClick={() => setShowAllUpcoming(!showAllUpcoming)}
-                  style={{ 
-                    marginTop: '12px', 
-                    textAlign: 'center', 
-                    color: 'var(--primary)', 
-                    fontSize: '14px', 
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    padding: '8px 0'
-                  }}
-                >
-                  {showAllUpcoming ? 'ซ่อนนัดหมาย' : `ดูอีก ${data.upcomingSchedules.length - 3} รายการ`}
+        {data.upcomingSchedules && data.upcomingSchedules.length > 0 && (
+          <>
+            <div 
+              onClick={() => setShowAllUpcoming(true)}
+              style={{
+                marginTop: '32px',
+                marginBottom: '24px',
+                background: '#F2F2F7',
+                borderRadius: '16px',
+                padding: '16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                cursor: 'pointer',
+                border: '1px solid rgba(0,0,0,0.04)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  background: '#FF3B30',
+                  color: 'white',
+                  borderRadius: '50%',
+                  width: '24px',
+                  height: '24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {data.upcomingSchedules.length}
                 </div>
-              )}
+                <span style={{ fontSize: '15px', fontWeight: '600', color: '#1C1C1E' }}>
+                  เช็คนัดหมายล่วงหน้า
+                </span>
+              </div>
+              <div style={{ color: '#8E8E93' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </div>
             </div>
-          );
-        })()}
+
+            {/* Modal */}
+            {showAllUpcoming && (
+              <div style={{
+                position: 'fixed',
+                top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+                padding: '20px',
+                animation: 'fadeIn 0.2s ease-out'
+              }}>
+                <div style={{
+                  background: '#FFFFFF',
+                  borderRadius: '24px',
+                  width: '100%',
+                  maxWidth: '400px',
+                  maxHeight: '80vh',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+                }}>
+                  <div style={{ padding: '20px', borderBottom: '1px solid #F2F2F7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1C1C1E', margin: 0 }}>นัดหมายล่วงหน้า</h2>
+                    <button 
+                      onClick={() => setShowAllUpcoming(false)}
+                      style={{ background: '#F2F2F7', border: 'none', borderRadius: '50%', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8E8E93', cursor: 'pointer' }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                  </div>
+                  
+                  <div style={{ padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {data.upcomingSchedules.map((item, idx) => {
+                       const date = new Date(item.datetime_iso);
+                       const formatted = date.toLocaleString('th-TH', { month: 'short', day: 'numeric' });
+                       return (
+                         <div key={`modal-up-${idx}`} style={{ 
+                           display: 'flex', justifyContent: 'space-between', padding: '16px', 
+                           background: '#F2F2F7',
+                           borderRadius: '16px',
+                           fontSize: '14px',
+                           alignItems: 'center'
+                         }}>
+                           <div style={{ color: '#1C1C1E', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600' }}>
+                             <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#D1D1D6' }} />
+                             {item.title}
+                           </div>
+                           <div style={{ color: '#FF3B30', fontSize: '13px', fontWeight: '600' }}>{formatted}</div>
+                         </div>
+                       );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
